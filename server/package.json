@@ -1,0 +1,19 @@
+{
+  "name": "local-ai-reels-mvp-server",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@google/genai": "^1.14.0",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "fluent-ffmpeg": "^2.1.3",
+    "multer": "^2.0.2",
+    "puppeteer": "^24.17.0",
+    "supertest": "^7.1.4"
+  }
+}
