@@ -1,7 +1,35 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export default function App() {
   const [selectedFile, setSelectedFile] = useState(null);
+  const [fileId, setFileId] = useState(null);
+  const [clips, setClips] = useState([]);
+  const [status, setStatus] = useState('等待上傳');
+  const [error, setError] = useState('');
+  const videoRef = useRef(null);
+  const [videoUrl, setVideoUrl] = useState('');
+
+  useEffect(() => () => videoUrl && URL.revokeObjectURL(videoUrl), [videoUrl]);
+
+  async function uploadAndAnalyze(file) {
+    setSelectedFile(file); setError(''); setStatus('正在上傳…'); setClips([]);
+    const nextVideoUrl = URL.createObjectURL(file); setVideoUrl(nextVideoUrl);
+    try {
+      const formData = new FormData(); formData.append('video', file);
+      const uploadResponse = await fetch('/api/upload', { method: 'POST', body: formData });
+      const uploadResult = await uploadResponse.json();
+      if (!uploadResponse.ok) throw new Error(uploadResult.error || '影片上傳失敗');
+      setFileId(uploadResult.fileId); setStatus('正在分析語音與高光片段…');
+      const analyzeResponse = await fetch('/api/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fileId: uploadResult.fileId }) });
+      const analyzeResult = await analyzeResponse.json();
+      if (!analyzeResponse.ok) throw new Error(analyzeResult.error || '影片分析失敗');
+      setClips(analyzeResult.clips.map((clip) => ({ ...clip, caption: clip.title })));
+      setStatus(`已找到 ${analyzeResult.clips.length} 個候選片段`);
+    } catch (requestError) { setError(requestError.message); setStatus('需要處理'); }
+  }
+
+  function updateClip(id, field, value) { setClips((current) => current.map((clip) => clip.id === id ? { ...clip, [field]: field.includes('time') ? Number(value) : value } : clip)); }
+  function previewClip(clip) { const video = videoRef.current; if (!video) return; video.currentTime = clip.start_time; video.play(); const stop = () => { if (video.currentTime >= clip.end_time) { video.pause(); video.removeEventListener('timeupdate', stop); } }; video.addEventListener('timeupdate', stop); }
 
   return (
     <main className="shell">
@@ -27,12 +55,12 @@ export default function App() {
           <input
             type="file"
             accept="video/mp4,video/quicktime,video/webm,video/x-matroska"
-            onChange={(event) => setSelectedFile(event.target.files?.[0] ?? null)}
+          onChange={(event) => event.target.files?.[0] && uploadAndAnalyze(event.target.files[0])}
           />
           <span className="upload-icon">↑</span>
           <strong>{selectedFile ? selectedFile.name : '拖曳影片到這裡，或點擊選擇'}</strong>
           <small>MP4 / MOV / WebM / MKV · 最大 2 GB</small>
-          {selectedFile && <span className="file-ready">素材已準備好，下一步可開始分析</span>}
+          {selectedFile && <span className="file-ready">{status}</span>}
         </label>
       </section>
 
@@ -42,13 +70,18 @@ export default function App() {
             <p className="section-kicker">02 / 審查與編輯</p>
             <h3>你的片段會在這裡出現</h3>
           </div>
-          <span className="muted-label">尚未分析</span>
+          <span className="muted-label">{status}</span>
         </div>
-        <div className="empty-track">
+        {videoUrl && <video ref={videoRef} className="source-video" src={videoUrl} controls />}
+        {error && <p className="error-message">{error}</p>}
+        {clips.length === 0 ? <div className="empty-track">
           <div className="track-line" />
           <span className="track-start">00:00</span>
           <span className="track-end">— — —</span>
-        </div>
+        </div> : <div className="clip-list">{clips.map((clip, index) => <article className="clip-card" key={clip.id}>
+          <div className="clip-index">0{index + 1}</div>
+          <div className="clip-fields"><label>標題<input value={clip.title} onChange={(event) => updateClip(clip.id, 'title', event.target.value)} /></label><label>字卡文字<input value={clip.caption} onChange={(event) => updateClip(clip.id, 'caption', event.target.value)} /></label><div className="time-row"><label>開始<input type="number" step="0.1" value={clip.start_time} onChange={(event) => updateClip(clip.id, 'start_time', event.target.value)} /></label><label>結束<input type="number" step="0.1" value={clip.end_time} onChange={(event) => updateClip(clip.id, 'end_time', event.target.value)} /></label><button type="button" onClick={() => previewClip(clip)}>預覽片段</button></div></div>
+        </article>)}</div>}
       </section>
     </main>
   );

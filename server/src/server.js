@@ -5,11 +5,12 @@ import cors from 'cors';
 import supertest from 'supertest';
 import { createUploadRouter } from './routes/upload.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { createAnalyzeRouter } from './routes/analyze.js';
 
 const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
 const serverDirectory = path.resolve(currentDirectory, '..');
 
-export function createApp({ uploadDirectory = path.join(serverDirectory, 'uploads') } = {}) {
+export function createApp({ uploadDirectory = path.join(serverDirectory, 'uploads'), tempDirectory = path.join(serverDirectory, 'temp') } = {}) {
   const app = express();
   const uploadRouter = createUploadRouter({ uploadDirectory });
 
@@ -21,6 +22,7 @@ export function createApp({ uploadDirectory = path.join(serverDirectory, 'upload
   });
 
   app.post('/api/upload', uploadRouter.upload.single('video'), uploadRouter.handleUpload);
+  app.post('/api/analyze', createAnalyzeRouter({ uploadDirectory, tempDirectory }));
   app.use(errorHandler);
 
   app.inject = (options) => {
