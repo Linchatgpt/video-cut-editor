@@ -31,9 +31,13 @@ function parseJsonResponse(raw) {
 export function validateHighlights(clips, duration, { clipCount = 3, clipDuration = 15 } = {}) {
   if (!Array.isArray(clips) || clips.length === 0 || clips.length > clipCount) throw new Error(`AI 回傳的片段數量不可超過 ${clipCount} 個`);
   const normalized = clips.map((clip, index) => {
-    const start = Number(clip.start_time); const end = Number(clip.end_time);
-    if (!Number.isFinite(start) || !Number.isFinite(end) || start < 0 || end <= start || end > duration) throw new Error(`第 ${index + 1} 個片段的時間範圍無效`);
-    if (end - start < clipDuration - 2 || end - start > clipDuration + 2) throw new Error(`第 ${index + 1} 個片段長度應接近 ${clipDuration} 秒`);
+    let start = Number(clip.start_time); let end = Number(clip.end_time);
+    if (!Number.isFinite(start) || !Number.isFinite(end) || start < 0 || end <= start || start >= duration) throw new Error(`第 ${index + 1} 個片段的時間範圍無效`);
+    if (end - start < clipDuration - 2 || end - start > clipDuration + 2) {
+      start = Math.max(0, Math.min(start, duration - clipDuration));
+      end = Math.min(duration, start + clipDuration);
+      console.warn('[gemini:normalize-time]', { index: index + 1, requested: { start: clip.start_time, end: clip.end_time }, normalized: { start, end } });
+    }
     return { id: String(clip.id || `clip-${index + 1}`), title: String(clip.title || '精彩片段').slice(0, 45), top_text: String(clip.top_text || clip.title || '精彩片段').slice(0, 60), bottom_text: String(clip.bottom_text || clip.title || '精彩片段').slice(0, 80), start_time: start, end_time: end };
   });
   for (let index = 1; index < normalized.length; index += 1) if (normalized[index].start_time < normalized[index - 1].end_time) throw new Error('AI 回傳的片段時間互相重疊');
