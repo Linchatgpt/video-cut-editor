@@ -61,6 +61,8 @@ h2 { max-width: 530px; margin-bottom: 20px; font-size: clamp(40px, 6vw, 76px); l
 .clip-fields input { width: 100%; border: 1px solid #3a4140; padding: 10px; color: #f4f0e8; background: #101214; outline: none; }
 .clip-fields input:focus { border-color: #f2b8a2; }
 .time-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; }
+.time-row input { width: 100%; min-height: 44px; border: 1px solid #45514f; padding: 10px; color: #f4f0e8; background: #101214; }
+.time-duration { align-self: center; color: #aeb8b4; font-size: 12px; white-space: nowrap; }
 .card-controls { display: flex; flex-wrap: wrap; gap: 16px; align-items: end; margin-top: 24px; padding: 16px; border: 1px solid #303536; background: #171a1c; }
 .card-controls label { display: grid; gap: 6px; color: #8f9895; font-size: 11px; text-transform: uppercase; }
 .card-controls input, .card-controls select { min-height: 38px; border: 1px solid #3a4140; color: #f4f0e8; background: #101214; }
