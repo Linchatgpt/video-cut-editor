@@ -108,6 +108,10 @@ h3 { margin-bottom: 0; font-size: 25px; letter-spacing: -.04em; }
 .studio-header h1 { margin: 0; max-width: min(60vw, 720px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .save-state { color: #a5d6a7; font-size: 12px; white-space: nowrap; }
 .studio-workbench { display: grid; grid-template-columns: 230px minmax(0, 1fr) 340px; gap: 22px; align-items: start; margin-top: 28px; }
+.preview-controls { grid-column: 2; min-width: 0; border: 1px solid #303536; background: #171a1c; padding: 18px 22px; display: grid; gap: 16px; }
+.controls-heading { display: flex; align-items: end; justify-content: space-between; gap: 12px; padding-bottom: 4px; border-bottom: 1px solid #303536; }
+.controls-heading h3 { margin: 0; }
+.controls-heading > span { color: #a5d6a7; font-size: 12px; }
 .clip-sidebar, .preview-panel, .settings-panel { min-width: 0; border: 1px solid #303536; background: #171a1c; }
 .clip-sidebar, .settings-panel { padding: 18px; }
 .preview-panel { position: relative; padding: 22px; }
@@ -178,6 +182,10 @@ h3 { margin-bottom: 0; font-size: 25px; letter-spacing: -.04em; }
 .settings-panel > .time-editor { order: 9; }
 .settings-panel > .settings-actions { order: 10; }
 .settings-panel > .rendered-result { order: 11; }
+.settings-panel > .position-group,
+.settings-panel > .time-editor,
+.settings-panel > .settings-actions,
+.settings-panel > .rendered-result { display: none; }
 .settings-panel .panel-heading { display: block; }
 .editing-label { display: block; margin-top: 4px; color: #a9b0ae !important; font-size: 12px !important; }
 .setting-field, .time-editor { display: grid; gap: 7px; color: #a9b0ae; font-size: 12px; }
@@ -250,10 +258,11 @@ h3 { margin-bottom: 0; font-size: 25px; letter-spacing: -.04em; }
   .clip-sidebar .panel-heading { margin-bottom: 10px; }
   .clip-item { display: inline-grid; width: min(260px, 78vw); margin: 0 8px 0 0; vertical-align: top; }
   .preview-panel { order: 1; padding: 12px; }
+  .preview-controls { order: 2; width: 100%; padding: 14px; }
   .workbench-video { min-height: 260px; max-height: none; }
   .workbench-video.is-vertical { width: min(100%, 78vw); }
   .workbench-video.is-square { width: min(100%, 92vw); }
-  .settings-panel { order: 2; padding: 14px; }
+  .settings-panel { order: 3; padding: 14px; }
   .style-grid { grid-template-columns: 1fr 1fr; }
   .style-grid .color-setting { grid-column: 1 / -1; }
   .preview-caption { top: 12px; right: 12px; bottom: 58px; left: 12px; }
