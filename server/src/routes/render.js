@@ -16,7 +16,7 @@ export function createRenderRouter({ uploadDirectory, tempDirectory, outputDirec
         const safeId = String(clip.id || crypto.randomUUID()).replace(/[^a-z0-9_-]/gi, '-');
         const layerPath = path.join(tempDirectory, `${safeId}-title.png`);
         const outputPath = path.join(outputDirectory, `${safeId}.mp4`);
-        await renderTitleCard({ title: clip.title, caption: clip.caption, outputPath: layerPath, style });
+        await renderTitleCard({ title: clip.title, caption: clip.caption, outputPath: layerPath, style: clip.style || style });
         await renderClip({ sourcePath, clip, titleLayerPath: layerPath, outputPath });
         outputs.push({ id: clip.id, downloadUrl: `/api/download/${path.basename(outputPath)}` });
       }
