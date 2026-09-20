@@ -5,13 +5,26 @@ export async function chooseHighlights(transcript, { apiKey = process.env.GEMINI
   const ai = new GoogleGenAI({ apiKey });
   const prompt = `你是短影音剪輯師。請從以下帶時間戳逐字稿挑選 ${clipCount} 個最有價值的片段，每段約 ${clipDuration} 秒。每個片段請分別產生上欄與下欄字卡內容：上欄是吸睛主句，下欄是補充重點。只回傳 JSON 陣列，不要 Markdown：[{"id":"clip-1","title":"內部標題","top_text":"上欄字卡","bottom_text":"下欄字卡","start_time":0,"end_time":${clipDuration}}]。時間必須來自逐字稿範圍，所有文字使用繁體中文。\n逐字稿：${JSON.stringify(transcript.segments)}`;
   try {
-    const response = await ai.models.generateContent({ model: process.env.GEMINI_MODEL || 'gemini-2.5-flash', contents: prompt });
+    const response = await ai.models.generateContent({ model: process.env.GEMINI_MODEL || 'gemini-2.5-flash', contents: prompt, config: { responseMimeType: 'application/json', temperature: 0.2 } });
     const raw = response.text?.trim() || '';
-    const json = JSON.parse(raw.replace(/^```json\s*|\s*```$/g, ''));
+    const json = parseJsonResponse(raw);
     return json;
   } catch (error) {
     console.error('[gemini:error]', { message: error.message });
     throw new Error(`Gemini 片段分析失敗：${error.message}`);
+  }
+}
+
+function parseJsonResponse(raw) {
+  const cleaned = raw.replace(/^```(?:json)?\s*|\s*```$/gi, '').trim();
+  try { return JSON.parse(cleaned); } catch (_error) {
+    const start = cleaned.indexOf('[');
+    const end = cleaned.lastIndexOf(']');
+    if (start >= 0 && end > start) {
+      try { return JSON.parse(cleaned.slice(start, end + 1)); } catch (_nestedError) { /* use the clearer error below */ }
+    }
+    console.error('[gemini:invalid-json]', { preview: raw.slice(0, 300) });
+    throw new Error('Gemini 沒有回傳有效的片段 JSON，請重新分析一次');
   }
 }
 
