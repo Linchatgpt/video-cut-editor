@@ -113,6 +113,26 @@ h3 { margin-bottom: 0; font-size: 25px; letter-spacing: -.04em; }
 .render-one { min-height: 46px; padding: 12px 18px; font-weight: 750; letter-spacing: .02em; }
 .render-one:disabled { opacity: .55; cursor: wait; }
 .clip-summary:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid rgba(242,184,162,.5); outline-offset: 2px; }
+.card-editor { position: relative; grid-template-columns: 184px minmax(280px, 1fr); padding: 20px; border: 1px solid #35403f; background: #111617; }
+.card-editor::before { content: "字卡工作區"; position: absolute; top: -9px; left: 14px; padding: 0 8px; color: #a7b1ae; background: #111617; font-size: 10px; font-weight: 800; letter-spacing: .14em; }
+.position-stage { overflow: hidden; border: 1px solid #64736f; background: radial-gradient(circle at 50% 28%, #304547 0, #182526 42%, #080c0d 100%); box-shadow: 0 12px 26px rgba(0,0,0,.25), inset 0 0 0 1px rgba(255,255,255,.05); }
+.position-stage::before { content: "預覽畫面  ·  點擊定位"; position: absolute; z-index: 1; top: 0; left: 0; right: 0; padding: 9px 8px; color: rgba(244,240,232,.72); background: linear-gradient(#101718cc, transparent); font-size: 10px; text-align: center; letter-spacing: .04em; }
+.stage-hint { display: none; }
+.position-controls { align-self: stretch; grid-template-columns: repeat(2, minmax(0, 1fr)); align-content: start; gap: 12px 14px; padding: 4px 0 0; }
+.position-controls::before { content: "字卡設定"; grid-column: 1 / -1; color: #f4f0e8; font-size: 14px; font-weight: 700; letter-spacing: -.01em; }
+.position-controls .layer-tabs { grid-column: 1 / -1; }
+.position-controls label { min-width: 0; padding: 10px 11px; border: 1px solid #303b3a; background: #171d1d; }
+.position-controls label:nth-of-type(4), .position-controls label:nth-of-type(5) { grid-column: 1 / -1; }
+.position-controls select, .position-controls input[type="number"] { width: 100%; border-color: #45514f; background: #0c1011; }
+.position-controls input[type="color"] { width: 100%; height: 44px; padding: 4px; border: 1px solid #45514f; background: #0c1011; cursor: pointer; }
+.position-controls input[type="range"] { margin: 7px 0 0; }
+.position-controls output { color: #f2b8a2; font: 700 12px ui-monospace, monospace; }
+.layer-tabs { gap: 3px; padding: 3px; border-color: #3a4645; background: #0b1011; }
+.layer-tabs button { min-height: 42px; color: #9ca8a4; font-size: 13px; font-weight: 700; }
+.layer-tabs button:hover:not(.active) { color: #f4f0e8; background: #202929; }
+.layer-tabs button.active { box-shadow: 0 2px 8px rgba(242,184,162,.16); }
+.render-one { width: fit-content; min-width: 160px; border-color: #f2b8a2; box-shadow: 0 8px 16px rgba(242,184,162,.08); }
+.render-one:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 10px 20px rgba(242,184,162,.14); }
 @media (max-width: 760px) {
   .shell { width: min(100% - 24px, 600px); }
   .clip-card { border-radius: 8px; }
@@ -127,8 +147,9 @@ h3 { margin-bottom: 0; font-size: 25px; letter-spacing: -.04em; }
   .clip-meta { align-items: flex-start; gap: 10px; flex-direction: column; }
   .clip-meta button { width: 100%; }
   .card-editor { grid-template-columns: 1fr; gap: 16px; padding: 12px; }
+  .card-editor::before { top: -8px; }
   .position-stage { width: min(100%, 220px); height: min(390px, 124vw); margin: 0 auto; }
-  .position-controls { width: 100%; }
+  .position-controls { width: 100%; grid-template-columns: 1fr 1fr; }
   .position-controls label { min-height: 44px; }
   .position-controls select, .position-controls input[type="number"] { font-size: 16px; }
   .render-one { width: 100%; }
