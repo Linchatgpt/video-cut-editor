@@ -37,6 +37,14 @@ h2 { max-width: 530px; margin-bottom: 20px; font-size: clamp(40px, 6vw, 76px); l
 .error-message { padding: 12px 14px; color: #ffb4a8; background: #321d1c; border-left: 2px solid #ff806e; }
 .clip-list { display: grid; gap: 14px; margin-top: 24px; }
 .clip-card { display: grid; grid-template-columns: 52px 1fr; gap: 18px; padding: 18px; border: 1px solid #303536; background: #171a1c; }
+.clip-card.is-closed { display: block; padding: 0; }
+.clip-summary { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto auto; gap: 14px; align-items: center; width: 100%; border: 0; padding: 14px 16px; color: #f4f0e8; background: transparent; text-align: left; }
+.clip-summary:hover { background: #202526; }
+.clip-summary-title { overflow: hidden; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+.clip-summary-time, .clip-summary-action { color: #8f9895; font-size: 12px; white-space: nowrap; }
+.clip-summary-action { color: #f2b8a2; }
+.clip-edit-panel { padding: 0 18px 18px 70px; }
+.clip-meta { display: flex; align-items: center; justify-content: space-between; color: #8f9895; font-size: 12px; }
 .clip-index { color: #f2b8a2; font: 700 18px ui-monospace, monospace; }
 .clip-fields { display: grid; gap: 12px; }
 .clip-fields label, .time-row label { display: grid; gap: 6px; color: #8f9895; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
