@@ -36,14 +36,16 @@ h2 { max-width: 530px; margin-bottom: 20px; font-size: clamp(40px, 6vw, 76px); l
 .source-video { display: block; width: min(100%, 720px); max-height: 360px; margin-top: 24px; background: #000; }
 .error-message { padding: 12px 14px; color: #ffb4a8; background: #321d1c; border-left: 2px solid #ff806e; }
 .clip-list { display: grid; gap: 14px; margin-top: 24px; }
-.clip-card { display: grid; grid-template-columns: 52px 1fr; gap: 18px; padding: 18px; border: 1px solid #303536; background: #171a1c; }
+.clip-card { display: grid; grid-template-columns: 52px 1fr; gap: 18px; padding: 18px; border: 1px solid #303536; background: #171a1c; transition: border-color .2s, box-shadow .2s, background .2s; }
+.clip-card.is-open { border-color: #465050; box-shadow: 0 16px 34px rgba(0, 0, 0, .2); }
 .clip-card.is-closed { display: block; padding: 0; }
-.clip-summary { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto auto; gap: 14px; align-items: center; width: 100%; border: 0; padding: 14px 16px; color: #f4f0e8; background: transparent; text-align: left; }
+.clip-summary { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto auto; gap: 14px; align-items: center; width: 100%; border: 0; padding: 14px 16px; color: #f4f0e8; background: transparent; text-align: left; cursor: pointer; }
 .clip-summary:hover { background: #202526; }
 .clip-summary-title { overflow: hidden; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
 .clip-summary-time, .clip-summary-action { color: #8f9895; font-size: 12px; white-space: nowrap; }
 .clip-summary-action { color: #f2b8a2; }
-.summary-preview { padding: 6px 10px; color: #101214; background: #a5d6a7; border: 0; font-size: 11px; }
+.summary-preview { min-width: 72px; padding: 7px 10px; color: #101214; background: #a5d6a7; border: 0; font-size: 11px; font-weight: 700; letter-spacing: .04em; }
+.summary-preview:hover { background: #c2e7c4; }
 .clip-edit-panel { padding: 0 18px 18px 70px; }
 .clip-meta { display: flex; align-items: center; justify-content: space-between; color: #8f9895; font-size: 12px; }
 .clip-edit-panel .clip-fields > label { max-width: 520px; }
