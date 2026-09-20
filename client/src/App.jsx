@@ -9,6 +9,14 @@ export default function App() {
   const videoRef = useRef(null);
   const [videoUrl, setVideoUrl] = useState('');
 
+  useEffect(() => {
+    fetch('/api/default-video').then((response) => response.ok ? response.json() : null).then((defaultVideo) => {
+      if (!defaultVideo) return;
+      setFileId(defaultVideo.fileId); setVideoUrl(defaultVideo.videoUrl); setStatus('預設影片已載入，可直接開始分析');
+      setSelectedFile({ name: defaultVideo.originalName });
+    }).catch(() => {});
+  }, []);
+
   useEffect(() => () => videoUrl && URL.revokeObjectURL(videoUrl), [videoUrl]);
 
   async function uploadAndAnalyze(file) {
@@ -25,6 +33,17 @@ export default function App() {
       if (!analyzeResponse.ok) throw new Error(analyzeResult.error || '影片分析失敗');
       setClips(analyzeResult.clips.map((clip) => ({ ...clip, caption: clip.title })));
       setStatus(`已找到 ${analyzeResult.clips.length} 個候選片段`);
+    } catch (requestError) { setError(requestError.message); setStatus('需要處理'); }
+  }
+
+  async function analyzeExistingVideo() {
+    if (!fileId) return;
+    setError(''); setStatus('正在分析語音與高光片段…');
+    try {
+      const response = await fetch('/api/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fileId }) });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || '影片分析失敗');
+      setClips(result.clips.map((clip) => ({ ...clip, caption: clip.title }))); setStatus(`已找到 ${result.clips.length} 個候選片段`);
     } catch (requestError) { setError(requestError.message); setStatus('需要處理'); }
   }
 
@@ -61,6 +80,7 @@ export default function App() {
           <strong>{selectedFile ? selectedFile.name : '拖曳影片到這裡，或點擊選擇'}</strong>
           <small>MP4 / MOV / WebM / MKV · 最大 2 GB</small>
           {selectedFile && <span className="file-ready">{status}</span>}
+          {fileId === 'default' && clips.length === 0 && <button type="button" onClick={(event) => { event.preventDefault(); analyzeExistingVideo(); }}>開始分析預設影片</button>}
         </label>
       </section>
 

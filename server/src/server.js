@@ -1,4 +1,5 @@
 import path from 'node:path';
+import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
 import cors from 'cors';
@@ -21,6 +22,18 @@ export function createApp({ uploadDirectory = path.join(serverDirectory, 'upload
     response.json({ ok: true, service: 'video-editor-api' });
   });
 
+  app.get('/api/default-video', (_request, response) => {
+    const defaultPath = path.join(uploadDirectory, 'default.mp4');
+    if (!requireFile(defaultPath)) return response.status(404).json({ error: '尚未設定預設影片' });
+    return response.json({ fileId: 'default', originalName: '鈴木一朗「我的夢想」中文字幕.mp4', videoUrl: '/api/video/default' });
+  });
+
+  app.get('/api/video/default', (_request, response) => {
+    const defaultPath = path.join(uploadDirectory, 'default.mp4');
+    if (!requireFile(defaultPath)) return response.status(404).json({ error: '尚未設定預設影片' });
+    return response.sendFile(defaultPath);
+  });
+
   app.post('/api/upload', uploadRouter.upload.single('video'), uploadRouter.handleUpload);
   app.post('/api/analyze', createAnalyzeRouter({ uploadDirectory, tempDirectory }));
   app.use(errorHandler);
@@ -34,6 +47,10 @@ export function createApp({ uploadDirectory = path.join(serverDirectory, 'upload
     return request[method](options.url);
   };
   return app;
+}
+
+function requireFile(filePath) {
+  return fs.existsSync(filePath);
 }
 
 const app = createApp();

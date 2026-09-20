@@ -10,7 +10,9 @@ export function createAnalyzeRouter({ uploadDirectory, tempDirectory }) {
   return async function analyze(request, response, next) {
     const { fileId } = request.body || {};
     if (!fileId || !/^[a-f0-9-]+$/i.test(fileId)) return response.status(400).json({ error: '缺少有效的 fileId' });
-    const videoPath = fs.readdirSync(uploadDirectory).find((name) => path.basename(name, path.extname(name)) === fileId);
+    const videoPath = fileId === 'default'
+      ? 'default.mp4'
+      : fs.readdirSync(uploadDirectory).find((name) => path.basename(name, path.extname(name)) === fileId);
     if (!videoPath) return response.status(404).json({ error: '找不到已上傳的影片' });
     const sourcePath = path.join(uploadDirectory, videoPath);
     const audioPath = path.join(tempDirectory, `${crypto.randomUUID()}.wav`);
