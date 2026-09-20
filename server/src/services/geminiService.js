@@ -38,6 +38,8 @@ export function validateHighlights(clips, duration, { clipCount = 3, clipDuratio
       end = Math.min(duration, start + clipDuration);
       console.warn('[gemini:normalize-time]', { index: index + 1, requested: { start: clip.start_time, end: clip.end_time }, normalized: { start, end } });
     }
+    start = Math.round(start * 10) / 10;
+    end = Math.round(end * 10) / 10;
     return { id: String(clip.id || `clip-${index + 1}`), title: String(clip.title || '精彩片段').slice(0, 45), top_text: String(clip.top_text || clip.title || '精彩片段').slice(0, 60), bottom_text: String(clip.bottom_text || clip.title || '精彩片段').slice(0, 80), start_time: start, end_time: end };
   });
   for (let index = 1; index < normalized.length; index += 1) {
