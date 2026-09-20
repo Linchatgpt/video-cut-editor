@@ -180,11 +180,25 @@ h3 { margin-bottom: 0; font-size: 25px; letter-spacing: -.04em; }
 .preview-action { color: #101214; background: #a5d6a7; border-color: #a5d6a7; }
 .settings-panel .render-one { min-width: 0; }
 .settings-panel .rendered-result { max-width: none; }
+
+/* The upload card owns its analysis controls; no visual overlap or second card. */
+.hero-grid { margin-bottom: 36px; }
+.upload-zone { min-height: 0; align-items: stretch; justify-content: flex-start; gap: 20px; padding: 24px; text-align: left; }
+.upload-select { min-height: 208px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 13px; padding: 24px; border: 1px dashed #59605f; text-align: center; cursor: pointer; }
+.upload-select:hover, .upload-select:focus-within { border-color: #f2b8a2; background: #1b1e20; }
+.upload-select input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.upload-zone > button { align-self: center; }
+.upload-zone .analysis-settings { display: grid; grid-template-columns: 1fr auto; gap: 12px 18px; align-items: end; margin: 0; padding: 16px; border: 1px solid #303536; background: #121516; }
+.upload-zone .analysis-settings .section-kicker { grid-column: 1 / -1; margin-bottom: 0; }
+.analysis-fields { display: flex; flex-wrap: wrap; gap: 12px; }
+.analysis-settings span { align-self: end; max-width: 210px; }
 @media (max-width: 1199px) { .studio-workbench { grid-template-columns: 190px minmax(0, 1fr) 300px; gap: 14px; } .clip-sidebar, .preview-panel, .settings-panel { padding: 14px; } }
 @media (max-width: 767px) {
-  .hero-grid { margin-bottom: 0; }
-  .hero-grid .upload-zone { min-height: 300px; padding-bottom: 34px; }
-  .hero-grid + .analysis-settings { width: 100%; margin: 0 0 20px; }
+  .hero-grid { margin-bottom: 20px; }
+  .hero-grid .upload-zone { min-height: 0; padding: 14px; }
+  .upload-zone .analysis-settings { grid-template-columns: 1fr; }
+  .upload-zone .analysis-settings .section-kicker { grid-column: auto; }
+  .analysis-settings span { max-width: none; }
   .studio-header { align-items: start; flex-direction: column; gap: 8px; padding-top: 20px; }
   .studio-header h1 { max-width: 100%; font-size: 16px; }
   .studio-workbench { display: flex; flex-direction: column; gap: 14px; margin-top: 18px; }
