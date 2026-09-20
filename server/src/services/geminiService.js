@@ -3,7 +3,7 @@ import { GoogleGenAI } from '@google/genai';
 export async function chooseHighlights(transcript, { apiKey = process.env.GEMINI_API_KEY, clipCount = 3, clipDuration = 15 } = {}) {
   if (!apiKey) throw new Error('尚未設定 GEMINI_API_KEY，無法進行 AI 片段分析');
   const ai = new GoogleGenAI({ apiKey });
-  const prompt = `你是短影音剪輯師。請從以下帶時間戳逐字稿挑選 ${clipCount} 個最有價值的片段，每段約 ${clipDuration} 秒。每個片段請分別產生上欄與下欄字卡內容：上欄是吸睛主句，下欄是補充重點。只回傳 JSON 陣列，不要 Markdown：[{"id":"clip-1","title":"內部標題","top_text":"上欄字卡","bottom_text":"下欄字卡","start_time":0,"end_time":${clipDuration}}]。時間必須來自逐字稿範圍，所有文字使用繁體中文。\n逐字稿：${JSON.stringify(transcript.segments)}`;
+  const prompt = `你是短影音剪輯師，正在分析一支可能是演唱、歌唱或純音樂的影片。請從以下帶時間戳逐字稿挑選 ${clipCount} 個最有價值的片段，每段約 ${clipDuration} 秒。歌詞只用來判斷情緒、段落與高潮，不要逐字重現或長篇引用歌詞；上欄與下欄請改寫成繁體中文短標題與內容摘要。即使逐字稿不完整、只有哼唱、歌聲或音樂，也必須根據可用時間戳回傳候選片段，不要回覆道歉、解釋或拒絕。每個片段請分別產生上欄與下欄字卡內容：上欄是吸睛主句，下欄是補充重點。只回傳 JSON 陣列，不要 Markdown：[{"id":"clip-1","title":"內部標題","top_text":"上欄字卡","bottom_text":"下欄字卡","start_time":0,"end_time":${clipDuration}}]。時間必須來自逐字稿範圍，所有文字使用繁體中文。\n逐字稿：${JSON.stringify(transcript.segments)}`;
   try {
     const response = await ai.models.generateContent({ model: process.env.GEMINI_MODEL || 'gemini-2.5-flash', contents: prompt, config: { responseMimeType: 'application/json', temperature: 0.2 } });
     const raw = response.text?.trim() || '';
