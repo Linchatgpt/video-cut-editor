@@ -165,7 +165,7 @@ h3 { margin-bottom: 0; font-size: 25px; letter-spacing: -.04em; }
 .setting-field input, .setting-field select, .time-editor input { width: 100%; min-height: 44px; border: 1px solid #45514f; padding: 10px; color: #f4f0e8; background: #0c1011; }
 .setting-field input { font-size: 16px; }
 .settings-panel .layer-tabs { display: flex; }
-.style-grid { display: grid; grid-template-columns: 1.25fr .7fr 1fr; gap: 8px; }
+.style-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) 82px 86px; gap: 8px; align-items: start; }
 .style-grid .setting-field { min-width: 0; }
 .style-grid .setting-field { font-size: 11px; }
 .style-grid .setting-field select, .style-grid .number-field, .style-grid .color-field { font-size: 12px; }
