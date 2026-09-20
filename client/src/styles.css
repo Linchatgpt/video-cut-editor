@@ -29,6 +29,10 @@ h2 { max-width: 530px; margin-bottom: 20px; font-size: clamp(40px, 6vw, 76px); l
 .upload-zone small, .muted-label { color: #777f7d; font-size: 12px; }
 .file-ready { color: #a5d6a7; font-size: 12px; }
 .workspace-preview { border-top: 1px solid #2b2f31; padding-top: 28px; }
+.analysis-settings { display: flex; flex-wrap: wrap; gap: 16px; align-items: end; margin: 0 0 36px; padding: 18px; border: 1px solid #303536; background: #171a1c; }
+.analysis-settings label { display: grid; gap: 6px; color: #a9b0ae; font-size: 12px; }
+.analysis-settings input { width: 100px; border: 1px solid #3a4140; padding: 9px; color: #f4f0e8; background: #101214; }
+.analysis-settings span { max-width: 360px; color: #777f7d; font-size: 12px; line-height: 1.5; }
 .source-video { display: block; width: min(100%, 720px); max-height: 360px; margin-top: 24px; background: #000; }
 .error-message { padding: 12px 14px; color: #ffb4a8; background: #321d1c; border-left: 2px solid #ff806e; }
 .clip-list { display: grid; gap: 14px; margin-top: 24px; }
