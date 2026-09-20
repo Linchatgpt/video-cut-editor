@@ -101,6 +101,10 @@ h3 { margin-bottom: 0; font-size: 25px; letter-spacing: -.04em; }
 .hero-grid .upload-zone { min-height: 420px; padding-bottom: 150px; }
 .hero-grid + .analysis-settings { position: relative; z-index: 2; width: calc(50% - 24px); margin: -120px 0 36px auto; padding: 18px; border: 1px solid #303536; background: #171a1c; }
 .hero-grid + .analysis-settings .section-kicker { width: 100%; }
+/* Keep the upload and analysis blocks stable until the settings are structurally nested. */
+.hero-grid { margin-bottom: 0; }
+.hero-grid .upload-zone { min-height: 300px; padding-bottom: 34px; }
+.hero-grid + .analysis-settings { position: static; width: auto; margin: 0 0 36px; padding: 18px; border: 1px solid #303536; background: #171a1c; }
 .studio-header h1 { margin: 0; max-width: min(60vw, 720px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .save-state { color: #a5d6a7; font-size: 12px; white-space: nowrap; }
 .studio-workbench { display: grid; grid-template-columns: 230px minmax(0, 1fr) 340px; gap: 22px; align-items: start; margin-top: 28px; }
