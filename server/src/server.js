@@ -45,6 +45,12 @@ export function createApp({ uploadDirectory = path.join(serverDirectory, 'upload
     if (!fs.existsSync(outputPath)) return response.status(404).json({ error: '找不到輸出影片' });
     return response.download(outputPath);
   });
+  app.get('/api/output/:fileName', (request, response) => {
+    const fileName = path.basename(request.params.fileName);
+    const outputPath = path.join(outputDirectory, fileName);
+    if (!fs.existsSync(outputPath)) return response.status(404).json({ error: '找不到輸出影片' });
+    return response.sendFile(outputPath);
+  });
   app.use(errorHandler);
 
   app.inject = (options) => {

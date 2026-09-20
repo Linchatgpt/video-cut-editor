@@ -20,7 +20,7 @@ export function createRenderRouter({ uploadDirectory, tempDirectory, outputDirec
         const outputPath = path.join(outputDirectory, `${safeId}-${crypto.randomUUID()}.mp4`);
         await renderTitleCard({ title: clip.title, caption: clip.caption, outputPath: layerPath, style: clip.style || style, outputAspect: clip.outputAspect, originalDimensions });
         await renderClip({ sourcePath, clip, titleLayerPath: layerPath, outputPath, originalDimensions });
-        outputs.push({ id: clip.id, downloadUrl: `/api/download/${path.basename(outputPath)}` });
+        outputs.push({ id: clip.id, previewUrl: `/api/output/${path.basename(outputPath)}`, downloadUrl: `/api/download/${path.basename(outputPath)}` });
       }
       return response.json({ outputs });
     } catch (error) { return next(error); }
