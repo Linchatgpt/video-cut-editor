@@ -11,6 +11,7 @@
 - Node.js 20+
 - npm 10+
 - FFmpeg（後續影音處理需要）
+- whisper.cpp 的 `whisper-cli` 與本地模型（本機預設使用 `server/models/ggml-base.bin`）
 
 ## 啟動
 
@@ -37,4 +38,13 @@ curl -F "video=@/path/to/video.mp4" http://localhost:8787/api/upload
 ```bash
 npm test
 npm --prefix client run build
+```
+
+## 本地語音辨識
+
+目前使用 Homebrew 的 `whisper-cli` 與本地 Whisper base 模型，不會上傳影片。若需要指定其他模型或執行檔，可在 `.env` 設定：
+
+```bash
+WHISPER_COMMAND=whisper-cli
+WHISPER_MODEL=./server/models/ggml-base.bin
 ```

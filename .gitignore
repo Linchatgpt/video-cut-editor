@@ -4,6 +4,7 @@ dist/
 server/uploads/*
 server/temp/*
 server/outputs/*
+server/models/*.bin
 !server/uploads/.gitkeep
 !server/temp/.gitkeep
 !server/outputs/.gitkeep
