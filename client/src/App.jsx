@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-const makeStyle = () => ({ topText: { color: '#2F80ED', fontSize: 72, fontFamily: 'Noto Sans TC', x: 50, y: 22, width: 88 }, bottomText: { color: '#2F80ED', fontSize: 72, fontFamily: 'Noto Sans TC', x: 50, y: 52, width: 88 } });
+const makeStyle = () => ({ topText: { color: '#2F80ED', fontSize: 72, fontFamily: 'Noto Sans TC', x: 50, y: 22, width: 88, showFrom: 0, hideAt: 9999 }, bottomText: { color: '#2F80ED', fontSize: 72, fontFamily: 'Noto Sans TC', x: 50, y: 52, width: 88, showFrom: 0, hideAt: 9999 } });
 const fonts = [
   { value: 'Noto Sans TC', label: 'Noto Sans TC' },
   { value: 'Iansui', label: '芫荽' },
@@ -21,7 +21,7 @@ export default function App() {
   const analyze = async (id) => { setError(''); setAnalyzing(true); setStatus('正在分析語音與高光片段…'); try { const r = await fetch('/api/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fileId: id, clipCount, clipDuration }) }); const data = await r.json(); if (!r.ok) throw new Error(data.error || '影片分析失敗'); const next = data.clips.map((c) => ({ ...c, top_text: c.top_text || c.title, caption: c.bottom_text || c.title, aiStart: c.start_time, aiEnd: c.end_time, outputAspect: 'original', style: makeStyle(), activeLayer: 'topText', musicFile: '' })); setClips(next); setSelectedClipId(next[0]?.id || null); setStatus('已找到 ' + data.clips.length + ' 個候選片段'); } catch (e) { setError(e.message); setStatus('需要處理'); } finally { setAnalyzing(false); } };
   async function upload(file) { setSelectedFile(file); setVideoUrl(URL.createObjectURL(file)); setClips([]); setSelectedClipId(null); setStatus('正在上傳…'); try { const form = new FormData(); form.append('video', file); const r = await fetch('/api/upload', { method: 'POST', body: form }); const data = await r.json(); if (!r.ok) throw new Error(data.error); setFileId(data.fileId); setDimensions(data.dimensions); await analyze(data.fileId); } catch (e) { setError(e.message); setStatus('需要處理'); } }
   const update = (id, field, value) => setClips((all) => all.map((c) => c.id === id ? { ...c, [field]: ['start_time', 'end_time'].includes(field) ? Number(value) : value, ...(['renderedUrl', 'downloadUrl', 'rendering'].includes(field) ? {} : { renderedUrl: undefined, downloadUrl: undefined }) } : c));
-  const updateLayer = (id, layer, field, value) => setClips((all) => all.map((c) => c.id === id ? { ...c, renderedUrl: undefined, style: { ...c.style, [layer]: { ...c.style[layer], [field]: ['x', 'y', 'fontSize', 'width'].includes(field) ? Number(value) : value } } } : c));
+  const updateLayer = (id, layer, field, value) => setClips((all) => all.map((c) => c.id === id ? { ...c, renderedUrl: undefined, style: { ...c.style, [layer]: { ...c.style[layer], [field]: ['x', 'y', 'fontSize', 'width', 'showFrom', 'hideAt'].includes(field) ? Number(value) : value } } } : c));
   const setLayer = (id, activeLayer) => setClips((all) => all.map((c) => c.id === id ? { ...c, activeLayer } : c));
   const resetPosition = (id, layer) => { updateLayer(id, layer, 'x', 50); updateLayer(id, layer, 'y', layer === 'topText' ? 22 : 52); };
   const updateAspect = (id, value) => setClips((all) => all.map((c) => c.id === id ? { ...c, outputAspect: value, renderedUrl: undefined } : c));
