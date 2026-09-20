@@ -43,8 +43,16 @@ h2 { max-width: 530px; margin-bottom: 20px; font-size: clamp(40px, 6vw, 76px); l
 .clip-summary-title { overflow: hidden; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
 .clip-summary-time, .clip-summary-action { color: #8f9895; font-size: 12px; white-space: nowrap; }
 .clip-summary-action { color: #f2b8a2; }
+.summary-preview { padding: 6px 10px; color: #101214; background: #a5d6a7; border: 0; font-size: 11px; }
 .clip-edit-panel { padding: 0 18px 18px 70px; }
 .clip-meta { display: flex; align-items: center; justify-content: space-between; color: #8f9895; font-size: 12px; }
+.clip-edit-panel .clip-fields > label { max-width: 520px; }
+.clip-edit-panel .clip-fields > label input { width: min(100%, 520px); }
+.clip-edit-panel .time-row { max-width: 620px; }
+.clip-edit-panel .card-editor { max-width: 760px; grid-template-columns: 150px minmax(260px, 1fr); }
+.clip-edit-panel .position-stage { width: 150px; height: 270px; }
+.clip-edit-panel .position-controls { max-width: 360px; }
+@media (max-width: 760px) { .clip-summary { grid-template-columns: 34px minmax(0, 1fr) auto; gap: 8px; } .clip-summary-time { display: none; } .clip-edit-panel { padding: 0 12px 14px; } .clip-edit-panel .card-editor { grid-template-columns: 1fr; } }
 .clip-index { color: #f2b8a2; font: 700 18px ui-monospace, monospace; }
 .clip-fields { display: grid; gap: 12px; }
 .clip-fields label, .time-row label { display: grid; gap: 6px; color: #8f9895; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
