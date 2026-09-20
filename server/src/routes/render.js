@@ -16,12 +16,14 @@ export function createRenderRouter({ uploadDirectory, tempDirectory, outputDirec
       const outputs = [];
       for (const clip of clips) {
         const safeId = String(clip.id || crypto.randomUUID()).replace(/[^a-z0-9_-]/gi, '-');
-        const layerPath = path.join(tempDirectory, `${safeId}-title.png`);
+        const topLayerPath = path.join(tempDirectory, `${safeId}-top.png`);
+        const bottomLayerPath = path.join(tempDirectory, `${safeId}-bottom.png`);
         const outputPath = path.join(outputDirectory, `${safeId}-${crypto.randomUUID()}.mp4`);
-        await renderTitleCard({ title: clip.top_text ?? clip.title, caption: clip.caption ?? clip.bottom_text, outputPath: layerPath, style: clip.style || style, outputAspect: clip.outputAspect, originalDimensions });
+        await renderTitleCard({ title: clip.top_text ?? clip.title, caption: clip.caption ?? clip.bottom_text, outputPath: topLayerPath, style: clip.style || style, outputAspect: clip.outputAspect, originalDimensions, layer: 'top' });
+        await renderTitleCard({ title: clip.top_text ?? clip.title, caption: clip.caption ?? clip.bottom_text, outputPath: bottomLayerPath, style: clip.style || style, outputAspect: clip.outputAspect, originalDimensions, layer: 'bottom' });
         const musicPath = clip.musicFile ? path.join(musicDirectory, path.basename(clip.musicFile)) : null;
         if (clip.musicFile && (!musicPath.startsWith(path.resolve(musicDirectory)) || !fs.existsSync(musicPath))) return response.status(400).json({ error: `找不到背景音樂：${clip.musicFile}` });
-        await renderClip({ sourcePath, clip, titleLayerPath: layerPath, outputPath, originalDimensions, musicPath });
+        await renderClip({ sourcePath, clip, titleLayerPath: topLayerPath, bottomLayerPath, outputPath, originalDimensions, musicPath });
         outputs.push({ id: clip.id, previewUrl: `/api/output/${path.basename(outputPath)}`, downloadUrl: `/api/download/${path.basename(outputPath)}` });
       }
       return response.json({ outputs });
