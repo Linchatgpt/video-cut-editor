@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import multer from 'multer';
+import { getVideoDimensions } from '../services/ffmpegService.js';
 
 const allowedMimeTypes = new Set(['video/mp4', 'video/quicktime', 'video/webm', 'video/x-matroska']);
 const allowedExtensions = new Set(['.mp4', '.mov', '.webm', '.mkv']);
@@ -31,7 +32,7 @@ export function createUploadRouter({ uploadDirectory }) {
     },
   });
 
-  return { upload, handleUpload(request, response) {
+  return { upload, async handleUpload(request, response) {
     if (!request.file) {
       return response.status(400).json({ error: '請選擇影片檔案後再上傳' });
     }
@@ -42,6 +43,7 @@ export function createUploadRouter({ uploadDirectory }) {
       path: request.file.path,
       size: request.file.size,
       mimeType: request.file.mimetype,
+      dimensions: await getVideoDimensions(request.file.path),
     });
   } };
 }

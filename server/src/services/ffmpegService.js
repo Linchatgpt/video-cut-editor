@@ -28,6 +28,17 @@ export function getDuration(videoPath) {
   });
 }
 
+export function getVideoDimensions(videoPath) {
+  return new Promise((resolve, reject) => {
+    ffmpeg.ffprobe(videoPath, (error, metadata) => {
+      if (error) return reject(new Error(`無法讀取影片尺寸：${error.message}`));
+      const stream = (metadata.streams || []).find((item) => item.codec_type === 'video');
+      if (!stream?.width || !stream?.height) return reject(new Error('找不到影片原始尺寸')); 
+      resolve({ width: Number(stream.width), height: Number(stream.height) });
+    });
+  });
+}
+
 export function removeIfExists(filePath) {
   try { fs.rmSync(filePath, { force: true }); } catch (error) { console.warn('[file:cleanup]', error.message); }
 }

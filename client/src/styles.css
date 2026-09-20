@@ -128,6 +128,7 @@ h3 { margin-bottom: 0; font-size: 25px; letter-spacing: -.04em; }
 .workbench-video { display: block; width: 100%; height: auto; max-height: 560px; min-height: 300px; aspect-ratio: 9 / 16; object-fit: cover; object-position: center; margin: 0 auto; background: #080c0d; }
 .workbench-video.is-vertical { width: min(100%, 315px); }
 .workbench-video.is-square { width: min(100%, 560px); }
+.workbench-video.is-original { width: min(100%, 560px); max-height: 560px; }
 .upload-zone button.is-loading { color: #101214; background: #f2b8a2; border-color: #f2b8a2; cursor: wait; animation: analysis-pulse 1.2s ease-in-out infinite; }
 @keyframes analysis-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(242,184,162,.1); } 50% { box-shadow: 0 0 0 8px rgba(242,184,162,.18); } }
 .preview-empty { display: grid; place-items: center; min-height: 420px; color: #7f8986; background: #080c0d; }

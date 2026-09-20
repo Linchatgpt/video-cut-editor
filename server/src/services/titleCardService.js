@@ -1,13 +1,13 @@
 import fs from 'node:fs/promises';
 import puppeteer from 'puppeteer';
 
-export async function renderTitleCard({ title, caption, outputPath, style = {}, outputAspect = '9:16' }) {
+export async function renderTitleCard({ title, caption, outputPath, style = {}, outputAspect = '9:16', originalDimensions }) {
   const browser = await puppeteer.launch({ headless: true });
   try {
     const page = await browser.newPage();
     const square = outputAspect === '1:1';
     const width = 1080;
-    const height = square ? 1080 : 1920;
+    const height = outputAspect === 'original' && originalDimensions ? Math.round(1080 * originalDimensions.height / originalDimensions.width) : square ? 1080 : 1920;
     await page.setViewport({ width, height, deviceScaleFactor: 1 });
     const top = style.topText || { color: '#2F80ED', fontFamily: 'Noto Sans TC', fontSize: 72, x: 50, y: 22 };
     const bottom = style.bottomText || { color: '#2F80ED', fontFamily: 'Noto Sans TC', fontSize: 72, x: 50, y: 52 };

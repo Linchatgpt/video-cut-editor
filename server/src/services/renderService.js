@@ -2,11 +2,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import ffmpeg from 'fluent-ffmpeg';
 
-export function renderClip({ sourcePath, clip, titleLayerPath, outputPath }) {
+export function renderClip({ sourcePath, clip, titleLayerPath, outputPath, originalDimensions }) {
   return new Promise((resolve, reject) => {
     const square = clip.outputAspect === '1:1';
-    const crop = square ? 'crop=ih:ih' : 'crop=ih*9/16:ih';
-    const size = square ? '1080:1080' : '1080:1920';
+    const original = clip.outputAspect === 'original';
+    const crop = original ? 'null' : square ? 'crop=ih:ih' : 'crop=ih*9/16:ih';
+    const size = original ? '1080:-2' : square ? '1080:1080' : '1080:1920';
     console.log('[ffmpeg] rendering reel', { sourcePath, outputPath, start: clip.start_time, end: clip.end_time, outputAspect: square ? '1:1' : '9:16' });
     ffmpeg(sourcePath).seekInput(clip.start_time).duration(clip.end_time - clip.start_time).input(titleLayerPath)
       .complexFilter(`[0:v]${crop},scale=${size}[base];[base][1:v]overlay=0:0:format=auto[outv]`)

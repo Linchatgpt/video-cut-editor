@@ -8,6 +8,7 @@ import { createUploadRouter } from './routes/upload.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { createAnalyzeRouter } from './routes/analyze.js';
 import { createRenderRouter } from './routes/render.js';
+import { getVideoDimensions } from './services/ffmpegService.js';
 
 const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
 const serverDirectory = path.resolve(currentDirectory, '..');
@@ -23,10 +24,10 @@ export function createApp({ uploadDirectory = path.join(serverDirectory, 'upload
     response.json({ ok: true, service: 'video-editor-api' });
   });
 
-  app.get('/api/default-video', (_request, response) => {
+  app.get('/api/default-video', async (_request, response, next) => {
     const defaultPath = path.join(uploadDirectory, 'default.mp4');
     if (!requireFile(defaultPath)) return response.status(404).json({ error: '尚未設定預設影片' });
-    return response.json({ fileId: 'default', originalName: '鈴木一朗「我的夢想」中文字幕.mp4', videoUrl: '/api/video/default' });
+    try { return response.json({ fileId: 'default', originalName: '鈴木一朗「我的夢想」中文字幕.mp4', videoUrl: '/api/video/default', dimensions: await getVideoDimensions(defaultPath) }); } catch (error) { return next(error); }
   });
 
   app.get('/api/video/default', (_request, response) => {
@@ -35,7 +36,7 @@ export function createApp({ uploadDirectory = path.join(serverDirectory, 'upload
     return response.sendFile(defaultPath);
   });
 
-  app.post('/api/upload', uploadRouter.upload.single('video'), uploadRouter.handleUpload);
+  app.post('/api/upload', uploadRouter.upload.single('video'), async (request, response, next) => { try { const result = uploadRouter.handleUpload(request, response); if (result?.then) await result; } catch (error) { next(error); } });
   app.post('/api/analyze', createAnalyzeRouter({ uploadDirectory, tempDirectory }));
   app.post('/api/render', createRenderRouter({ uploadDirectory, tempDirectory, outputDirectory }));
   app.get('/api/download/:fileName', (request, response) => {
