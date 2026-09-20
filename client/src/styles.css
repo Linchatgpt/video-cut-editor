@@ -92,3 +92,45 @@ h3 { margin-bottom: 0; font-size: 25px; letter-spacing: -.04em; }
 .track-start { left: 16px; } .track-end { right: 16px; }
 @media (max-width: 760px) { .shell { width: min(100% - 28px, 600px); padding-top: 22px; } .hero-grid { grid-template-columns: 1fr; padding: 64px 0; gap: 40px; } h2 { font-size: clamp(42px, 14vw, 64px); } .status-dot { font-size: 0; } .status-dot::before { margin-right: 0; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
+
+/* Clip editor: a quiet workbench on desktop, a thumb-friendly sheet on mobile. */
+.clip-edit-panel { display: grid; gap: 16px; }
+.clip-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 14px; }
+.clip-fields label { min-width: 0; }
+.clip-fields input, .position-controls select, .position-controls input[type="number"] { min-height: 44px; border-radius: 4px; }
+.clip-meta { min-height: 34px; padding: 8px 0 2px; border-top: 1px solid #2b3232; }
+.clip-meta button { min-height: 40px; padding: 8px 12px; color: #101214; background: #f2b8a2; }
+.card-editor { grid-template-columns: 184px minmax(0, 1fr); align-items: start; gap: 22px; padding: 18px; border-color: #3b4645; background: #0f1314; }
+.position-stage { width: 184px; height: 326px; border-color: #64716f; box-shadow: inset 0 0 0 1px rgba(255,255,255,.04); }
+.position-stage::after { content: "9 : 16"; position: absolute; right: 8px; bottom: 8px; color: #71807c; font: 10px ui-monospace, monospace; letter-spacing: .08em; }
+.stage-text { width: 34px; height: 10px; border: 2px solid rgba(255,255,255,.75); box-shadow: 0 0 0 3px rgba(0,0,0,.22), 0 0 12px currentColor; }
+.position-controls { min-width: 0; gap: 12px; }
+.position-controls label { font-size: 12px; letter-spacing: .02em; }
+.position-controls input[type="range"] { width: 100%; accent-color: #f2b8a2; }
+.layer-tabs { padding: 4px; background: #1a2020; border: 1px solid #303a39; }
+.layer-tabs button { flex: 1; min-height: 44px; border: 0; color: #aeb8b4; background: transparent; }
+.layer-tabs button.active { color: #101214; background: #f2b8a2; }
+.render-one { min-height: 46px; padding: 12px 18px; font-weight: 750; letter-spacing: .02em; }
+.render-one:disabled { opacity: .55; cursor: wait; }
+.clip-summary:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid rgba(242,184,162,.5); outline-offset: 2px; }
+@media (max-width: 760px) {
+  .shell { width: min(100% - 24px, 600px); }
+  .clip-card { border-radius: 8px; }
+  .clip-summary { min-height: 64px; grid-template-columns: 30px minmax(0, 1fr) auto; padding: 10px; }
+  .clip-summary-title { font-size: 15px; }
+  .clip-summary-action { grid-column: 2 / 3; grid-row: 2; font-size: 11px; }
+  .summary-preview { grid-column: 3; grid-row: 1 / span 2; min-height: 44px; min-width: 88px; }
+  .clip-edit-panel { padding: 0 10px 14px; }
+  .clip-fields { grid-template-columns: 1fr; }
+  .clip-fields label { font-size: 12px; }
+  .clip-fields input { font-size: 16px; }
+  .clip-meta { align-items: flex-start; gap: 10px; flex-direction: column; }
+  .clip-meta button { width: 100%; }
+  .card-editor { grid-template-columns: 1fr; gap: 16px; padding: 12px; }
+  .position-stage { width: min(100%, 220px); height: min(390px, 124vw); margin: 0 auto; }
+  .position-controls { width: 100%; }
+  .position-controls label { min-height: 44px; }
+  .position-controls select, .position-controls input[type="number"] { font-size: 16px; }
+  .render-one { width: 100%; }
+  .rendered-result { max-width: 100%; }
+}
