@@ -117,7 +117,7 @@ h3 { margin-bottom: 0; font-size: 25px; letter-spacing: -.04em; }
 .clip-item-copy em { color: #a5d6a7; font-size: 10px; font-style: normal; }
 .clip-item-play { align-self: center; display: grid; place-items: center; width: 28px; height: 28px; color: #a5d6a7; font-size: 11px; }
 .sidebar-empty, .settings-empty { color: #7f8986; font-size: 12px; line-height: 1.6; }
-.workbench-video { display: block; width: 100%; height: auto; max-height: 560px; min-height: 300px; aspect-ratio: 9 / 16; object-fit: contain; margin: 0 auto; background: #080c0d; }
+.workbench-video { display: block; width: 100%; height: auto; max-height: 560px; min-height: 300px; aspect-ratio: 9 / 16; object-fit: cover; object-position: center; margin: 0 auto; background: #080c0d; }
 .workbench-video.is-vertical { width: min(100%, 315px); }
 .workbench-video.is-square { width: min(100%, 560px); }
 .upload-zone button.is-loading { color: #101214; background: #f2b8a2; border-color: #f2b8a2; cursor: wait; animation: analysis-pulse 1.2s ease-in-out infinite; }
