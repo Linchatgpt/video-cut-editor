@@ -54,6 +54,17 @@ h2 { max-width: 530px; margin-bottom: 20px; font-size: clamp(40px, 6vw, 76px); l
 .rendered-result { display: grid; gap: 10px; margin-top: 16px; max-width: 260px; }
 .rendered-result video { width: 100%; background: #000; }
 .rendered-result a { color: #a5d6a7; font-size: 13px; }
+.card-editor { display: grid; grid-template-columns: 180px 1fr; gap: 18px; padding: 16px; border: 1px solid #303536; background: #121516; }
+.position-stage { position: relative; width: 180px; height: 320px; cursor: crosshair; border: 1px solid #48504e; background: linear-gradient(145deg, #1d2a2b, #0b1011); }
+.stage-hint { position: absolute; top: 8px; left: 0; right: 0; color: #7d8884; font-size: 10px; text-align: center; }
+.stage-text { position: absolute; width: 24px; height: 8px; transform: translate(-50%, -50%); border-radius: 3px; box-shadow: 0 0 8px currentColor; }
+.position-controls { display: grid; align-content: start; gap: 10px; }
+.position-controls label { display: grid; gap: 5px; color: #8f9895; font-size: 11px; }
+.position-controls select, .position-controls input[type="number"] { min-height: 32px; border: 1px solid #3a4140; color: #f4f0e8; background: #101214; }
+.position-controls output { float: right; color: #f2b8a2; }
+.layer-tabs { display: flex; gap: 8px; }
+.layer-tabs button { padding: 7px 11px; color: #f4f0e8; background: #202627; border-color: #3a4140; }
+.layer-tabs button.active { color: #101214; background: #f2b8a2; border-color: #f2b8a2; }
 button { border: 1px solid #f2b8a2; padding: 10px 14px; color: #101214; background: #f2b8a2; cursor: pointer; }
 .preview-header { display: flex; align-items: end; justify-content: space-between; gap: 20px; }
 h3 { margin-bottom: 0; font-size: 25px; letter-spacing: -.04em; }
