@@ -7,11 +7,12 @@ import supertest from 'supertest';
 import { createUploadRouter } from './routes/upload.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { createAnalyzeRouter } from './routes/analyze.js';
+import { createRenderRouter } from './routes/render.js';
 
 const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
 const serverDirectory = path.resolve(currentDirectory, '..');
 
-export function createApp({ uploadDirectory = path.join(serverDirectory, 'uploads'), tempDirectory = path.join(serverDirectory, 'temp') } = {}) {
+export function createApp({ uploadDirectory = path.join(serverDirectory, 'uploads'), tempDirectory = path.join(serverDirectory, 'temp'), outputDirectory = path.join(serverDirectory, 'outputs') } = {}) {
   const app = express();
   const uploadRouter = createUploadRouter({ uploadDirectory });
 
@@ -36,6 +37,13 @@ export function createApp({ uploadDirectory = path.join(serverDirectory, 'upload
 
   app.post('/api/upload', uploadRouter.upload.single('video'), uploadRouter.handleUpload);
   app.post('/api/analyze', createAnalyzeRouter({ uploadDirectory, tempDirectory }));
+  app.post('/api/render', createRenderRouter({ uploadDirectory, tempDirectory, outputDirectory }));
+  app.get('/api/download/:fileName', (request, response) => {
+    const fileName = path.basename(request.params.fileName);
+    const outputPath = path.join(outputDirectory, fileName);
+    if (!fs.existsSync(outputPath)) return response.status(404).json({ error: '找不到輸出影片' });
+    return response.download(outputPath);
+  });
   app.use(errorHandler);
 
   app.inject = (options) => {

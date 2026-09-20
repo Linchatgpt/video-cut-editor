@@ -8,6 +8,8 @@ export default function App() {
   const [error, setError] = useState('');
   const videoRef = useRef(null);
   const [videoUrl, setVideoUrl] = useState('');
+  const [style, setStyle] = useState({ color: '#2F80ED', fontSize: 72, position: 'bottom', fontFamily: 'Noto Sans TC' });
+  const [outputs, setOutputs] = useState([]);
 
   useEffect(() => {
     fetch('/api/default-video').then((response) => response.ok ? response.json() : null).then((defaultVideo) => {
@@ -49,6 +51,7 @@ export default function App() {
 
   function updateClip(id, field, value) { setClips((current) => current.map((clip) => clip.id === id ? { ...clip, [field]: field.includes('time') ? Number(value) : value } : clip)); }
   function previewClip(clip) { const video = videoRef.current; if (!video) return; video.currentTime = clip.start_time; video.play(); const stop = () => { if (video.currentTime >= clip.end_time) { video.pause(); video.removeEventListener('timeupdate', stop); } }; video.addEventListener('timeupdate', stop); }
+  async function renderReels() { setStatus('正在渲染 Reels…'); setError(''); try { const response = await fetch('/api/render', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fileId, clips, style }) }); const result = await response.json(); if (!response.ok) throw new Error(result.error || '影片渲染失敗'); setOutputs(result.outputs); setStatus('渲染完成，可下載影片'); } catch (requestError) { setError(requestError.message); setStatus('需要處理'); } }
 
   return (
     <main className="shell">
@@ -98,10 +101,20 @@ export default function App() {
           <div className="track-line" />
           <span className="track-start">00:00</span>
           <span className="track-end">— — —</span>
-        </div> : <div className="clip-list">{clips.map((clip, index) => <article className="clip-card" key={clip.id}>
+        </div> : <>
+          <div className="card-controls">
+            <label>字卡顏色<input type="color" value={style.color} onChange={(event) => setStyle({ ...style, color: event.target.value })} /></label>
+            <label>字級<input type="number" min="32" max="140" value={style.fontSize} onChange={(event) => setStyle({ ...style, fontSize: event.target.value })} /></label>
+            <label>位置<select value={style.position} onChange={(event) => setStyle({ ...style, position: event.target.value })}><option value="top">上方</option><option value="center">中央</option><option value="bottom">下方</option></select></label>
+            <span className="font-preview">Noto Sans TC</span>
+          </div>
+          <div className="clip-list">{clips.map((clip, index) => <article className="clip-card" key={clip.id}>
           <div className="clip-index">0{index + 1}</div>
           <div className="clip-fields"><label>標題<input value={clip.title} onChange={(event) => updateClip(clip.id, 'title', event.target.value)} /></label><label>字卡文字<input value={clip.caption} onChange={(event) => updateClip(clip.id, 'caption', event.target.value)} /></label><div className="time-row"><label>開始<input type="number" step="0.1" value={clip.start_time} onChange={(event) => updateClip(clip.id, 'start_time', event.target.value)} /></label><label>結束<input type="number" step="0.1" value={clip.end_time} onChange={(event) => updateClip(clip.id, 'end_time', event.target.value)} /></label><button type="button" onClick={() => previewClip(clip)}>預覽片段</button></div></div>
-        </article>)}</div>}
+          </article>)}</div>
+          <button className="render-button" type="button" onClick={renderReels}>確認字卡並渲染 {clips.length} 支 Reels</button>
+          {outputs.length > 0 && <div className="downloads">{outputs.map((output, index) => <a key={output.id} href={output.downloadUrl}>下載 Reel {index + 1}</a>)}</div>}
+        </>}
       </section>
     </main>
   );

@@ -39,6 +39,13 @@ h2 { max-width: 530px; margin-bottom: 20px; font-size: clamp(40px, 6vw, 76px); l
 .clip-fields input { width: 100%; border: 1px solid #3a4140; padding: 10px; color: #f4f0e8; background: #101214; outline: none; }
 .clip-fields input:focus { border-color: #f2b8a2; }
 .time-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; }
+.card-controls { display: flex; flex-wrap: wrap; gap: 16px; align-items: end; margin-top: 24px; padding: 16px; border: 1px solid #303536; background: #171a1c; }
+.card-controls label { display: grid; gap: 6px; color: #8f9895; font-size: 11px; text-transform: uppercase; }
+.card-controls input, .card-controls select { min-height: 38px; border: 1px solid #3a4140; color: #f4f0e8; background: #101214; }
+.font-preview { margin-left: auto; color: #f2b8a2; font-size: 13px; }
+.render-button { margin-top: 22px; padding: 13px 18px; font-weight: 700; }
+.downloads { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.downloads a { padding: 10px 14px; color: #101214; background: #a5d6a7; text-decoration: none; }
 button { border: 1px solid #f2b8a2; padding: 10px 14px; color: #101214; background: #f2b8a2; cursor: pointer; }
 .preview-header { display: flex; align-items: end; justify-content: space-between; gap: 20px; }
 h3 { margin-bottom: 0; font-size: 25px; letter-spacing: -.04em; }
