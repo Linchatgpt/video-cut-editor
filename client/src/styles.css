@@ -159,6 +159,13 @@ h3 { margin-bottom: 0; font-size: 25px; letter-spacing: -.04em; }
 .settings-panel > .style-grid { order: 4; }
 .settings-panel > .position-group { order: 5; }
 .settings-panel > .time-editor { order: 6; }
+.settings-panel > .setting-field:nth-child(2) { order: 1; }
+.settings-panel > .layer-tabs { order: 2; }
+.settings-panel > .setting-field:nth-child(5) { order: 3; }
+.settings-panel > .style-grid { order: 4; }
+.settings-panel > .position-group { order: 5; }
+.settings-panel > .time-editor { order: 6; }
+.settings-panel > .setting-field:nth-child(3) { order: 7; }
 .settings-panel .panel-heading { display: block; }
 .editing-label { display: block; margin-top: 4px; color: #a9b0ae !important; font-size: 12px !important; }
 .setting-field, .time-editor { display: grid; gap: 7px; color: #a9b0ae; font-size: 12px; }
