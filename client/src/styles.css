@@ -95,6 +95,7 @@ h3 { margin-bottom: 0; font-size: 25px; letter-spacing: -.04em; }
 
 /* Clip editor: a quiet workbench on desktop, a thumb-friendly sheet on mobile. */
 .clip-edit-panel { display: grid; gap: 16px; }
+.clip-edit-panel::before { content: "編輯字卡  /  文字 → 定位 → 樣式 → 輸出"; display: block; padding-bottom: 2px; color: #aeb8b4; font-size: 11px; font-weight: 800; letter-spacing: .1em; }
 .clip-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 14px; }
 .clip-fields label { min-width: 0; }
 .clip-fields input, .position-controls select, .position-controls input[type="number"] { min-height: 44px; border-radius: 4px; }
