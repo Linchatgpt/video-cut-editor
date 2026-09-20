@@ -5,7 +5,7 @@ export async function chooseHighlights(transcript, { apiKey = process.env.GEMINI
   const ai = new GoogleGenAI({ apiKey });
   const prompt = `你是短影音剪輯師。請從以下帶時間戳逐字稿挑選最多 3 個最有價值的片段，每段約 15 秒。價值可來自清楚觀點、反直覺洞察、情緒轉折或可獨立理解的故事。只回傳 JSON 陣列，不要 Markdown：[{"id":"clip-1","title":"15字內吸睛標題","start_time":0,"end_time":15}]。時間必須來自逐字稿範圍，標題使用繁體中文。\n逐字稿：${JSON.stringify(transcript.segments)}`;
   try {
-    const response = await ai.models.generateContent({ model: process.env.GEMINI_MODEL || 'gemini-1.5-flash', contents: prompt });
+    const response = await ai.models.generateContent({ model: process.env.GEMINI_MODEL || 'gemini-2.5-flash', contents: prompt });
     const raw = response.text?.trim() || '';
     const json = JSON.parse(raw.replace(/^```json\s*|\s*```$/g, ''));
     return json;
