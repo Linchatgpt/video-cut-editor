@@ -19,8 +19,11 @@
 npm install
 npm --prefix server install
 npm --prefix client install
+cp .env.example .env
 npm run dev
 ```
+
+啟動前請在 `.env` 填入自己的 `GEMINI_API_KEY`。請只在本機編輯此檔案，不要把 key 貼到聊天或提交到 Git；`.env` 已被忽略。
 
 - 前端：http://localhost:5173
 - 後端健康檢查：http://localhost:8787/api/health
