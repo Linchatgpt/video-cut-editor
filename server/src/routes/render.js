@@ -5,7 +5,7 @@ import { renderTitleCard } from '../services/titleCardService.js';
 import { findUploadedVideo, renderClip } from '../services/renderService.js';
 import { getVideoDimensions } from '../services/ffmpegService.js';
 
-export function createRenderRouter({ uploadDirectory, tempDirectory, outputDirectory }) {
+export function createRenderRouter({ uploadDirectory, tempDirectory, outputDirectory, musicDirectory }) {
   [tempDirectory, outputDirectory].forEach((directory) => fs.mkdirSync(directory, { recursive: true }));
   return async function render(request, response, next) {
     const { fileId, clips, style } = request.body || {};
@@ -19,7 +19,9 @@ export function createRenderRouter({ uploadDirectory, tempDirectory, outputDirec
         const layerPath = path.join(tempDirectory, `${safeId}-title.png`);
         const outputPath = path.join(outputDirectory, `${safeId}-${crypto.randomUUID()}.mp4`);
         await renderTitleCard({ title: clip.top_text ?? clip.title, caption: clip.caption ?? clip.bottom_text, outputPath: layerPath, style: clip.style || style, outputAspect: clip.outputAspect, originalDimensions });
-        await renderClip({ sourcePath, clip, titleLayerPath: layerPath, outputPath, originalDimensions });
+        const musicPath = clip.musicFile ? path.join(musicDirectory, path.basename(clip.musicFile)) : null;
+        if (clip.musicFile && (!musicPath.startsWith(path.resolve(musicDirectory)) || !fs.existsSync(musicPath))) return response.status(400).json({ error: `找不到背景音樂：${clip.musicFile}` });
+        await renderClip({ sourcePath, clip, titleLayerPath: layerPath, outputPath, originalDimensions, musicPath });
         outputs.push({ id: clip.id, previewUrl: `/api/output/${path.basename(outputPath)}`, downloadUrl: `/api/download/${path.basename(outputPath)}` });
       }
       return response.json({ outputs });

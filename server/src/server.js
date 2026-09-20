@@ -13,9 +13,10 @@ import { getVideoDimensions } from './services/ffmpegService.js';
 const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
 const serverDirectory = path.resolve(currentDirectory, '..');
 
-export function createApp({ uploadDirectory = path.join(serverDirectory, 'uploads'), tempDirectory = path.join(serverDirectory, 'temp'), outputDirectory = path.join(serverDirectory, 'outputs') } = {}) {
+export function createApp({ uploadDirectory = path.join(serverDirectory, 'uploads'), tempDirectory = path.join(serverDirectory, 'temp'), outputDirectory = path.join(serverDirectory, 'outputs'), musicDirectory = path.join(serverDirectory, 'music') } = {}) {
   const app = express();
   const uploadRouter = createUploadRouter({ uploadDirectory });
+  fs.mkdirSync(musicDirectory, { recursive: true });
 
   app.use(cors());
   app.use(express.json({ limit: '1mb' }));
@@ -38,7 +39,8 @@ export function createApp({ uploadDirectory = path.join(serverDirectory, 'upload
 
   app.post('/api/upload', uploadRouter.upload.single('video'), async (request, response, next) => { try { const result = uploadRouter.handleUpload(request, response); if (result?.then) await result; } catch (error) { next(error); } });
   app.post('/api/analyze', createAnalyzeRouter({ uploadDirectory, tempDirectory }));
-  app.post('/api/render', createRenderRouter({ uploadDirectory, tempDirectory, outputDirectory }));
+  app.get('/api/music', (_request, response) => response.json({ music: fs.readdirSync(musicDirectory).filter((name) => /\.(mp3|wav|m4a|aac|ogg)$/i.test(name)).sort() }));
+  app.post('/api/render', createRenderRouter({ uploadDirectory, tempDirectory, outputDirectory, musicDirectory }));
   app.get('/api/download/:fileName', (request, response) => {
     const fileName = path.basename(request.params.fileName);
     const outputPath = path.join(outputDirectory, fileName);
