@@ -171,12 +171,13 @@ h3 { margin-bottom: 0; font-size: 25px; letter-spacing: -.04em; }
 .settings-panel > .setting-field:nth-child(2) { order: 2; }
 .settings-panel > .layer-tabs { order: 3; }
 .settings-panel > .setting-field:nth-child(6) { order: 4; }
-.settings-panel > .music-field { order: 5; }
-.settings-panel > .style-grid { order: 6; }
-.settings-panel > .position-group { order: 7; }
-.settings-panel > .time-editor { order: 8; }
-.settings-panel > .settings-actions { order: 9; }
-.settings-panel > .rendered-result { order: 10; }
+.settings-panel > .caption-timing { order: 5; }
+.settings-panel > .music-field { order: 6; }
+.settings-panel > .style-grid { order: 7; }
+.settings-panel > .position-group { order: 8; }
+.settings-panel > .time-editor { order: 9; }
+.settings-panel > .settings-actions { order: 10; }
+.settings-panel > .rendered-result { order: 11; }
 .settings-panel .panel-heading { display: block; }
 .editing-label { display: block; margin-top: 4px; color: #a9b0ae !important; font-size: 12px !important; }
 .setting-field, .time-editor { display: grid; gap: 7px; color: #a9b0ae; font-size: 12px; }
