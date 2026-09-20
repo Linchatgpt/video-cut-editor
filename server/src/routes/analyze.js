@@ -9,7 +9,7 @@ export function createAnalyzeRouter({ uploadDirectory, tempDirectory }) {
   fs.mkdirSync(tempDirectory, { recursive: true });
   return async function analyze(request, response, next) {
     const { fileId } = request.body || {};
-    if (!fileId || !/^[a-f0-9-]+$/i.test(fileId)) return response.status(400).json({ error: '缺少有效的 fileId' });
+    if (!fileId || (fileId !== 'default' && !/^[a-f0-9-]+$/i.test(fileId))) return response.status(400).json({ error: '缺少有效的 fileId' });
     const videoPath = fileId === 'default'
       ? 'default.mp4'
       : fs.readdirSync(uploadDirectory).find((name) => path.basename(name, path.extname(name)) === fileId);
