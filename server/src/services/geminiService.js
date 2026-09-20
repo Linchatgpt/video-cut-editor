@@ -40,6 +40,16 @@ export function validateHighlights(clips, duration, { clipCount = 3, clipDuratio
     }
     return { id: String(clip.id || `clip-${index + 1}`), title: String(clip.title || '精彩片段').slice(0, 45), top_text: String(clip.top_text || clip.title || '精彩片段').slice(0, 60), bottom_text: String(clip.bottom_text || clip.title || '精彩片段').slice(0, 80), start_time: start, end_time: end };
   });
-  for (let index = 1; index < normalized.length; index += 1) if (normalized[index].start_time < normalized[index - 1].end_time) throw new Error('AI 回傳的片段時間互相重疊');
+  for (let index = 1; index < normalized.length; index += 1) {
+    const previousEnd = normalized[index - 1].end_time;
+    if (normalized[index].start_time < previousEnd) {
+      const start = previousEnd;
+      const end = Math.min(duration, start + clipDuration);
+      if (end <= start) throw new Error('影片長度不足以容納所有候選片段');
+      console.warn('[gemini:normalize-overlap]', { index: index + 1, normalized: { start, end } });
+      normalized[index].start_time = start;
+      normalized[index].end_time = end;
+    }
+  }
   return normalized;
 }
