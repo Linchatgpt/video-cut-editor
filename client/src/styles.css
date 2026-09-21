@@ -9,6 +9,14 @@
 * { box-sizing: border-box; }
 body { margin: 0; min-width: 320px; background: #101214; }
 button, input { font: inherit; }
+.music-preview-audio { display: none; }
+.music-controls { display: grid; gap: 8px; margin: 0 0 18px; padding: 12px 14px; color: #aeb7b5; border: 1px solid #2b3334; background: #171b20; font-size: 12px; }
+.music-controls label { display: grid; gap: 5px; color: #f2b8a2; }
+.music-controls output { justify-self: end; margin-top: -20px; color: #f2b8a2; font: 700 12px ui-monospace, monospace; }
+.music-controls input[type="range"] { width: 100%; }
+.music-controls .checkbox-field { display: flex; align-items: center; gap: 8px; color: #f4f0e8; }
+.music-controls .checkbox-field input { accent-color: #f2b8a2; }
+.music-controls small { color: #aeb7b5; line-height: 1.45; }
 
 .pwa-install-prompt { position: fixed; z-index: 20; right: 22px; bottom: 22px; display: grid; grid-template-columns: auto 1fr auto auto; gap: 12px; align-items: center; width: min(390px, calc(100vw - 32px)); padding: 14px 16px; color: #f7f2eb; background: #171b20; border: 1px solid #f2b8a2; box-shadow: 6px 6px 0 rgba(242,184,162,.18); }
 .pwa-install-icon { display: grid; place-items: center; width: 34px; height: 34px; color: #101214; background: #f2b8a2; font-size: 13px; }

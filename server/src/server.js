@@ -40,6 +40,13 @@ export function createApp({ uploadDirectory = path.join(serverDirectory, 'upload
   app.post('/api/upload', uploadRouter.upload.single('video'), async (request, response, next) => { try { const result = uploadRouter.handleUpload(request, response); if (result?.then) await result; } catch (error) { next(error); } });
   app.post('/api/analyze', createAnalyzeRouter({ uploadDirectory, tempDirectory }));
   app.get('/api/music', (_request, response) => response.json({ music: fs.readdirSync(musicDirectory).filter((name) => /\.(mp3|wav|m4a|aac|ogg)$/i.test(name)).sort() }));
+  app.get('/api/music/:fileName', (request, response) => {
+    const fileName = path.basename(request.params.fileName);
+    if (!/\.(mp3|wav|m4a|aac|ogg)$/i.test(fileName)) return response.status(400).json({ error: '不支援的音樂格式' });
+    const musicPath = path.join(musicDirectory, fileName);
+    if (!fs.existsSync(musicPath)) return response.status(404).json({ error: '找不到背景音樂' });
+    return response.sendFile(musicPath);
+  });
   app.post('/api/render', createRenderRouter({ uploadDirectory, tempDirectory, outputDirectory, musicDirectory, publicApiUrl }));
   app.get('/api/download/:fileName', (request, response) => {
     const fileName = path.basename(request.params.fileName);
