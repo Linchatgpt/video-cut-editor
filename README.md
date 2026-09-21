@@ -47,6 +47,10 @@ VITE_API_BASE_URL=https://你的公開-api-網址
 
 ## API
 
+## 使用手冊
+
+完整的繁體中文操作說明請參考：[docs/使用手冊.md](docs/使用手冊.md)。
+
 ```bash
 curl http://localhost:8787/api/health
 curl -F "video=@/path/to/video.mp4" http://localhost:8787/api/upload
