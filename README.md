@@ -29,6 +29,22 @@ npm run dev
 - 後端健康檢查：http://localhost:8787/api/health
 - 上傳檔案保存於 `server/uploads/`
 
+## 公開部署準備
+
+前端可部署到 Netlify，根目錄的 `netlify.toml` 已設定：
+
+- Base directory：`client`
+- Build command：`npm run build`
+- Publish directory：`dist`
+
+影片分析與渲染仍由 Mac mini 上的 Express、FFmpeg、Whisper 執行。公開部署前，需將 Mac mini API 透過 HTTPS 公開網址提供給前端，並在 Netlify 的環境變數設定：
+
+```text
+VITE_API_BASE_URL=https://你的公開-api-網址
+```
+
+本機開發時保持空白即可，Vite 會繼續使用 `localhost:8787` 代理。
+
 ## API
 
 ```bash
