@@ -27,6 +27,7 @@ export default function App() {
   const audioRef = useRef(null);
   const videoAudioContextRef = useRef(null);
   const videoGainRef = useRef(null);
+  const musicGainRef = useRef(null);
   const [installPrompt, setInstallPrompt] = useState(null);
   const [installGuide, setInstallGuide] = useState(false);
   const [installVisible, setInstallVisible] = useState(false);
@@ -59,29 +60,71 @@ export default function App() {
   const updateAspect = (id, value) => setClips((all) => all.map((c) => c.id === id ? { ...c, outputAspect: value, renderedUrl: undefined } : c));
   const addManualClip = () => { const start = Number(manualStart); const end = Number(manualEnd); if (!Number.isFinite(start) || !Number.isFinite(end) || start < 0 || end <= start) { setError('手動片段時間無效，請確認開始與結束時間。'); return; } const clip = { id: `manual-${Date.now()}`, source: 'manual', title: `手動片段${clips.filter((item) => item.source === 'manual').length ? clips.filter((item) => item.source === 'manual').length + 1 : ''}`, top_text: '', caption: '', start_time: start, end_time: end, aiStart: start, aiEnd: end, outputAspect: 'original', style: makeStyle(), activeLayer: 'topText', musicFile: '', musicVolume: 0.35, originalVolume: 1 }; setClips((all) => [...all, clip]); setSelectedClipId(clip.id); setError(''); };
   const aspectLabel = (aspect) => aspect === '1:1' ? '1:1 正方形' : aspect === 'original' ? '原始比例' : '9:16 Reels';
-  const stopOtherVideos = (event) => { document.querySelectorAll('video').forEach((video) => { if (video !== event.currentTarget) video.pause(); }); };
-  const preview = (clip) => { const v = videoRef.current; const a = audioRef.current; if (!v) return; if (playingClipId === clip.id && !v.paused) { v.pause(); a?.pause(); if (videoGainRef.current) videoGainRef.current.gain.value = 1; v.volume = 1; v.ontimeupdate = null; setPlayingClipId(null); return; } document.querySelectorAll('video').forEach((video) => video.pause()); a?.pause(); v.ontimeupdate = null; const AudioContextClass = window.AudioContext || window.webkitAudioContext; if (!videoAudioContextRef.current && AudioContextClass) { const context = new AudioContextClass(); const source = context.createMediaElementSource(v); const gain = context.createGain(); source.connect(gain).connect(context.destination); videoAudioContextRef.current = context; videoGainRef.current = gain; } videoAudioContextRef.current?.resume(); const originalVolume = Number(clip.originalVolume ?? 1); if (videoGainRef.current) videoGainRef.current.gain.value = originalVolume; v.muted = false; v.volume = 1; v.currentTime = clip.start_time; if (a && clip.musicFile) { a.src = `${API_BASE_URL}/api/music/${encodeURIComponent(clip.musicFile)}`; a.currentTime = 0; a.volume = Number(clip.musicVolume ?? 0.35); a.play().catch(() => {}); } setPreviewTime(0); v.play(); setPlayingClipId(clip.id); v.ontimeupdate = () => { setPreviewTime(Math.max(0, v.currentTime - clip.start_time)); if (v.currentTime >= clip.end_time) { v.pause(); a?.pause(); if (videoGainRef.current) videoGainRef.current.gain.value = 1; v.volume = 1; v.ontimeupdate = null; setPlayingClipId(null); } }; };
+  const stopOtherVideos = (event) => { document.querySelectorAll('video').forEach((video) => { if (video !== event.currentTarget) video.pause(); });  startPreviewAudio(); };
+  const applyPreviewVolume = (clip) => {
+    const volume = Math.min(1, Math.max(0, Number(clip?.originalVolume ?? 1)));
+    if (videoGainRef.current) videoGainRef.current.gain.value = volume;
+    if (videoRef.current) {
+      videoRef.current.muted = volume === 0;
+      videoRef.current.volume = videoGainRef.current ? 1 : volume;
+    }
+    const musicVolume = Math.min(1, Math.max(0, Number(clip?.musicVolume ?? 0.35)));
+    if (musicGainRef.current) musicGainRef.current.gain.value = musicVolume;
+    if (audioRef.current) {
+      audioRef.current.volume = musicGainRef.current ? 1 : musicVolume;
+      audioRef.current.muted = musicVolume === 0;
+    }
+  };
+  const startPreviewAudio = () => {
+    const clip = clips.find(c => c.id === selectedClipId) || clips[0];
+    const v = videoRef.current; const a = audioRef.current;
+    if (!v) return;
+    try {
+      const Context = window.AudioContext || window.webkitAudioContext;
+      if (!videoAudioContextRef.current && Context) {
+        const context = new Context();
+        const gain = context.createGain();
+        context.createMediaElementSource(v).connect(gain).connect(context.destination);
+        const musicGain = context.createGain();
+        context.createMediaElementSource(a).connect(musicGain).connect(context.destination);
+        videoAudioContextRef.current = context;
+        videoGainRef.current = gain; musicGainRef.current = musicGain;
+      }
+      applyPreviewVolume(clip);
+      videoAudioContextRef.current?.resume().catch(() => setError('無法啟動音訊，請暫停後再按試聽。'));
+      if (!clip) return;
+      setPlayingClipId(clip.id);
+      if (clip.musicFile && a) {
+        const url = `${API_BASE_URL}/api/music/${encodeURIComponent(clip.musicFile)}`;
+        if (a.getAttribute('src') !== url) a.src = url;
+        a.currentTime = Math.max(0, v.currentTime - clip.start_time);
+        a.play().catch(() => setError('背景音樂無法播放，請暫停後再試。'));
+      } else a?.pause();
+    } catch (e) { setError('音訊預覽啟動失敗：' + e.message); }
+  };
+  const preview = (clip) => {
+    const v = videoRef.current; if (!v) return;
+    if (playingClipId === clip.id && !v.paused) { v.pause(); return; }
+    document.querySelectorAll('video').forEach(video => video.pause());
+    audioRef.current?.pause();
+    v.currentTime = clip.start_time;
+    setPreviewTime(0);
+    v.play().catch(() => setError('影片無法播放，請再按一次試聽。'));
+  };
   async function renderOne(clip) { if (!Number.isFinite(clip.start_time) || !Number.isFinite(clip.end_time) || clip.end_time <= clip.start_time) { setError('結束時間必須大於開始時間，請先調整片段範圍。'); return; } update(clip.id, 'rendering', true); try { const r = await fetch('/api/render', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fileId, clips: [clip] }) }); const data = await readJson(r); if (!r.ok) throw new Error(data.error || '影片渲染失敗'); update(clip.id, 'renderedUrl', data.outputs[0].previewUrl); update(clip.id, 'downloadUrl', data.outputs[0].downloadUrl); update(clip.id, 'rendering', false); setStatus('片段 ' + (clips.findIndex((c) => c.id === clip.id) + 1) + ' 已完成渲染'); } catch (e) { setError(e.message); update(clip.id, 'rendering', false); } }
 
   const selectedClip = clips.find((clip) => clip.id === selectedClipId) || clips[0];
-  useEffect(() => {
-    if (selectedClip && playingClipId === selectedClip.id && videoRef.current) {
-      const originalVolume = Number(selectedClip.originalVolume ?? 1);
-      if (videoGainRef.current) videoGainRef.current.gain.value = originalVolume;
-      else videoRef.current.volume = originalVolume;
-      if (audioRef.current) audioRef.current.volume = Number(selectedClip.musicVolume ?? 0.35);
-    }
-  }, [selectedClip, playingClipId]);
+  useEffect(() => { applyPreviewVolume(selectedClip); }, [selectedClip?.id, selectedClip?.originalVolume, selectedClip?.musicVolume]);
   return <main className="shell">
     {installVisible && <InstallPrompt ios={installGuide} onInstall={installApp} onDismiss={dismissInstall} />}
-    <audio ref={audioRef} preload="metadata" className="music-preview-audio" />
+    <audio crossOrigin="anonymous" loop ref={audioRef} preload="metadata" className="music-preview-audio" />
     <header className="studio-header"><div><p className="eyebrow">REEL STUDIO</p><h1>{selectedFile?.name || '尚未選擇影片'}</h1></div><span className="save-state">● {status}</span></header>
     <section className="hero-grid"><div className="hero-copy"><p className="section-kicker">01 / 上傳素材</p><h2>找到觀眾會停下來看的 15 秒。</h2><p className="hero-description">上傳一支長影片，AI 會先替你找出有價值的片段。</p></div><div className="upload-zone"><label className="upload-select"><input type="file" accept="video/mp4,video/quicktime,video/webm,video/x-matroska" onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} /><span className="upload-icon">↑</span><strong>{selectedFile ? selectedFile.name : '選擇長影片'}</strong><small>MP4 / MOV / WebM / MKV · 最大 2 GB</small></label>{fileId === 'default' && !clips.length && <button className={analyzing ? 'is-loading' : ''} type="button" disabled={analyzing} onClick={() => analyze(fileId)}>{analyzing ? 'AI 分析中…' : '開始分析預設影片'}</button>}<section className="analysis-settings"><p className="section-kicker">AI 分析參數</p><div className="analysis-fields"><label>片段數量<input type="number" min="1" max="5" value={clipCount} onChange={(e) => setClipCount(Number(e.target.value))} /></label><label>每段秒數<input type="number" min="10" max="60" value={clipDuration} onChange={(e) => setClipDuration(Number(e.target.value))} /></label></div><span>AI 會依照設定找出候選片段，之後仍可逐支微調。</span></section></div></section>
     {error && <p className="error-message">{error}</p>}
     {fileId && <div className="manual-clip-form"><span>手動新增片段</span><label>開始<input type="number" min="0" step="0.1" value={manualStart} onChange={(e) => setManualStart(e.target.value)} /></label><label>結束<input type="number" min="0" step="0.1" value={manualEnd} onChange={(e) => setManualEnd(e.target.value)} /></label><button type="button" className="manual-clip-button" onClick={addManualClip}>新增片段</button></div>}
     <section className="studio-workbench">
       <aside className="clip-sidebar"><div className="panel-heading"><div><p className="section-kicker">02 / 片段</p><h3>候選片段</h3></div><span>{clips.length} 個</span></div>{clips.length ? clips.map((clip, index) => <button type="button" className={'clip-item ' + (selectedClip?.id === clip.id ? 'is-selected' : '')} key={clip.id} onClick={() => { setSelectedClipId(clip.id); setPlayingClipId(null); }}><span className="clip-item-index">0{index + 1}</span><span className="clip-item-copy"><strong>{clip.title || '未命名片段'}</strong><small>目前 {clip.start_time.toFixed(1)}s – {clip.end_time.toFixed(1)}s</small><em>AI 建議 {clip.aiStart.toFixed(1)}s – {clip.aiEnd.toFixed(1)}s</em></span><span className="clip-item-play" onClick={(event) => { event.stopPropagation(); setSelectedClipId(clip.id); preview(clip); }}>{playingClipId === clip.id ? '■' : '▶'}</span></button>) : <div className="sidebar-empty">完成分析後，片段會出現在這裡。</div>}</aside>
-      <section className="preview-panel"><div className="panel-heading"><div><p className="section-kicker">03 / 預覽</p><h3>{selectedClip?.title || '預覽與調整'}</h3></div>{selectedClip && <span className="preview-range">{aspectLabel(selectedClip.outputAspect)}</span>}</div>{videoUrl ? <video crossOrigin="anonymous" ref={videoRef} className={'source-video workbench-video ' + (selectedClip?.outputAspect === '1:1' ? 'is-square' : selectedClip?.outputAspect === 'original' ? 'is-original' : 'is-vertical')} style={{ aspectRatio: selectedClip?.outputAspect === '1:1' ? '1 / 1' : selectedClip?.outputAspect === 'original' && dimensions ? dimensions.width + ' / ' + dimensions.height : '9 / 16' }} src={videoUrl} controls onPlay={stopOtherVideos} onPause={() => setPlayingClipId(null)} onTimeUpdate={() => { if (selectedClip && videoRef.current) setPreviewTime(Math.max(0, videoRef.current.currentTime - selectedClip.start_time)); }} /> : <div className="preview-empty">先上傳影片</div>}{selectedClip && <div className="preview-caption"><span className={previewTime >= Number(selectedClip.style.topText.showFrom || 0) && previewTime <= Number(selectedClip.style.topText.hideAt >= 9999 ? selectedClip.end_time - selectedClip.start_time : selectedClip.style.topText.hideAt) ? '' : 'is-hidden'} style={{ left: selectedClip.style.topText.x + '%', top: selectedClip.style.topText.y + '%', maxWidth: selectedClip.style.topText.width + '%', fontSize: Math.max(8, selectedClip.style.topText.fontSize * (selectedClip.outputAspect === '1:1' ? 560 : 315) / 1080) + 'px', fontFamily: selectedClip.style.topText.fontFamily, color: selectedClip.style.topText.color }}>{selectedClip.top_text}</span><span className={previewTime >= Number(selectedClip.style.bottomText.showFrom || 0) && previewTime <= Number(selectedClip.style.bottomText.hideAt >= 9999 ? selectedClip.end_time - selectedClip.start_time : selectedClip.style.bottomText.hideAt) ? '' : 'is-hidden'} style={{ left: selectedClip.style.bottomText.x + '%', top: selectedClip.style.bottomText.y + '%', maxWidth: selectedClip.style.bottomText.width + '%', fontSize: Math.max(8, selectedClip.style.bottomText.fontSize * (selectedClip.outputAspect === '1:1' ? 560 : 315) / 1080) + 'px', fontFamily: selectedClip.style.bottomText.fontFamily, color: selectedClip.style.bottomText.color }}>{selectedClip.caption}</span></div>}{selectedClip && <div className="timeline-summary"><span>目前輸出 {selectedClip.start_time.toFixed(1)}s – {selectedClip.end_time.toFixed(1)}s</span><span>片段長度 {Math.max(0, selectedClip.end_time - selectedClip.start_time).toFixed(1)} 秒</span></div>}</section>
+      <section className="preview-panel"><div className="panel-heading"><div><p className="section-kicker">03 / 預覽</p><h3>{selectedClip?.title || '預覽與調整'}</h3></div>{selectedClip && <span className="preview-range">{aspectLabel(selectedClip.outputAspect)}</span>}</div>{videoUrl ? <video playsInline crossOrigin="anonymous" ref={videoRef} className={'source-video workbench-video ' + (selectedClip?.outputAspect === '1:1' ? 'is-square' : selectedClip?.outputAspect === 'original' ? 'is-original' : 'is-vertical')} style={{ aspectRatio: selectedClip?.outputAspect === '1:1' ? '1 / 1' : selectedClip?.outputAspect === 'original' && dimensions ? dimensions.width + ' / ' + dimensions.height : '9 / 16' }} src={videoUrl} controls onPlay={stopOtherVideos} onPause={() => { audioRef.current?.pause(); setPlayingClipId(null); }} onTimeUpdate={() => { if (selectedClip && videoRef.current) { setPreviewTime(Math.max(0, videoRef.current.currentTime - selectedClip.start_time)); if (videoRef.current.currentTime >= selectedClip.end_time) videoRef.current.pause(); } }} /> : <div className="preview-empty">先上傳影片</div>}{selectedClip && <div className="preview-caption"><span className={previewTime >= Number(selectedClip.style.topText.showFrom || 0) && previewTime <= Number(selectedClip.style.topText.hideAt >= 9999 ? selectedClip.end_time - selectedClip.start_time : selectedClip.style.topText.hideAt) ? '' : 'is-hidden'} style={{ left: selectedClip.style.topText.x + '%', top: selectedClip.style.topText.y + '%', maxWidth: selectedClip.style.topText.width + '%', fontSize: Math.max(8, selectedClip.style.topText.fontSize * (selectedClip.outputAspect === '1:1' ? 560 : 315) / 1080) + 'px', fontFamily: selectedClip.style.topText.fontFamily, color: selectedClip.style.topText.color }}>{selectedClip.top_text}</span><span className={previewTime >= Number(selectedClip.style.bottomText.showFrom || 0) && previewTime <= Number(selectedClip.style.bottomText.hideAt >= 9999 ? selectedClip.end_time - selectedClip.start_time : selectedClip.style.bottomText.hideAt) ? '' : 'is-hidden'} style={{ left: selectedClip.style.bottomText.x + '%', top: selectedClip.style.bottomText.y + '%', maxWidth: selectedClip.style.bottomText.width + '%', fontSize: Math.max(8, selectedClip.style.bottomText.fontSize * (selectedClip.outputAspect === '1:1' ? 560 : 315) / 1080) + 'px', fontFamily: selectedClip.style.bottomText.fontFamily, color: selectedClip.style.bottomText.color }}>{selectedClip.caption}</span></div>}{selectedClip && <div className="timeline-summary"><span>目前輸出 {selectedClip.start_time.toFixed(1)}s – {selectedClip.end_time.toFixed(1)}s</span><span>片段長度 {Math.max(0, selectedClip.end_time - selectedClip.start_time).toFixed(1)} 秒</span></div>}</section>
       {selectedClip && <ClipControls clip={selectedClip} update={update} updateLayer={updateLayer} resetPosition={resetPosition} renderOne={renderOne} />}
       {selectedClip ? <ClipSettings clip={selectedClip} dimensions={dimensions} musicFiles={musicFiles} update={update} updateLayer={updateLayer} updateAspect={updateAspect} setLayer={setLayer} resetPosition={resetPosition} renderOne={renderOne} fonts={fonts} playing={playingClipId === selectedClip.id} preview={preview} /> : <aside className="settings-panel settings-empty">選擇一個片段開始編輯。</aside>}
     </section>
