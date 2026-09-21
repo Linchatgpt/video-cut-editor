@@ -24,6 +24,26 @@ const fonts = [
 export default function App() {
   const [selectedFile, setSelectedFile] = useState(null), [fileId, setFileId] = useState(null), [clips, setClips] = useState([]), [selectedClipId, setSelectedClipId] = useState(null), [status, setStatus] = useState('等待上傳'), [error, setError] = useState(''), [videoUrl, setVideoUrl] = useState(''), [dimensions, setDimensions] = useState(null), [musicFiles, setMusicFiles] = useState([]), [manualStart, setManualStart] = useState('0'), [manualEnd, setManualEnd] = useState('15'), [clipCount, setClipCount] = useState(3), [clipDuration, setClipDuration] = useState(15), [playingClipId, setPlayingClipId] = useState(null), [previewTime, setPreviewTime] = useState(0), [analyzing, setAnalyzing] = useState(false);
   const videoRef = useRef(null);
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [installGuide, setInstallGuide] = useState(false);
+  const [installVisible, setInstallVisible] = useState(false);
+
+  useEffect(() => {
+    const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    if (standalone || localStorage.getItem('reel-studio-pwa-installed') === 'true') return undefined;
+    const isIos = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+    const dismissedAt = Number(localStorage.getItem('reel-studio-pwa-dismissed-at') || 0);
+    const canShowAgain = !dismissedAt || Date.now() - dismissedAt > 1000 * 60 * 60 * 24 * 30;
+    const onBeforeInstallPrompt = (event) => { event.preventDefault(); setInstallPrompt(event); if (canShowAgain) setInstallVisible(true); };
+    const onInstalled = () => { localStorage.setItem('reel-studio-pwa-installed', 'true'); setInstallVisible(false); setInstallPrompt(null); };
+    window.addEventListener('beforeinstallprompt', onBeforeInstallPrompt);
+    window.addEventListener('appinstalled', onInstalled);
+    if (isIos && canShowAgain) { setInstallGuide(true); setInstallVisible(true); }
+    return () => { window.removeEventListener('beforeinstallprompt', onBeforeInstallPrompt); window.removeEventListener('appinstalled', onInstalled); };
+  }, []);
+
+  const dismissInstall = () => { localStorage.setItem('reel-studio-pwa-dismissed-at', String(Date.now())); setInstallVisible(false); };
+  const installApp = async () => { if (!installPrompt) return; installPrompt.prompt(); await installPrompt.userChoice; setInstallPrompt(null); setInstallVisible(false); };
 
   useEffect(() => { fetch('/api/default-video').then((r) => r.ok ? r.json() : null).then((v) => { if (v) { setFileId(v.fileId); setVideoUrl(v.videoUrl); setDimensions(v.dimensions); setSelectedFile({ name: v.originalName }); setStatus('預設影片已載入，可直接開始分析'); } }).catch(() => {}); }, []);
   useEffect(() => { fetch('/api/music').then((r) => r.ok ? r.json() : null).then((v) => v && setMusicFiles(v.music || [])).catch(() => {}); }, []);
@@ -42,6 +62,7 @@ export default function App() {
 
   const selectedClip = clips.find((clip) => clip.id === selectedClipId) || clips[0];
   return <main className="shell">
+    {installVisible && <InstallPrompt ios={installGuide} onInstall={installApp} onDismiss={dismissInstall} />}
     <header className="studio-header"><div><p className="eyebrow">REEL STUDIO</p><h1>{selectedFile?.name || '尚未選擇影片'}</h1></div><span className="save-state">● {status}</span></header>
     <section className="hero-grid"><div className="hero-copy"><p className="section-kicker">01 / 上傳素材</p><h2>找到觀眾會停下來看的 15 秒。</h2><p className="hero-description">上傳一支長影片，AI 會先替你找出有價值的片段。</p></div><div className="upload-zone"><label className="upload-select"><input type="file" accept="video/mp4,video/quicktime,video/webm,video/x-matroska" onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} /><span className="upload-icon">↑</span><strong>{selectedFile ? selectedFile.name : '選擇長影片'}</strong><small>MP4 / MOV / WebM / MKV · 最大 2 GB</small></label>{fileId === 'default' && !clips.length && <button className={analyzing ? 'is-loading' : ''} type="button" disabled={analyzing} onClick={() => analyze(fileId)}>{analyzing ? 'AI 分析中…' : '開始分析預設影片'}</button>}<section className="analysis-settings"><p className="section-kicker">AI 分析參數</p><div className="analysis-fields"><label>片段數量<input type="number" min="1" max="5" value={clipCount} onChange={(e) => setClipCount(Number(e.target.value))} /></label><label>每段秒數<input type="number" min="10" max="60" value={clipDuration} onChange={(e) => setClipDuration(Number(e.target.value))} /></label></div><span>AI 會依照設定找出候選片段，之後仍可逐支微調。</span></section></div></section>
     {error && <p className="error-message">{error}</p>}
@@ -54,6 +75,16 @@ export default function App() {
     </section>
   </main>;
 }
+
+function InstallPrompt({ ios, onInstall, onDismiss }) {
+  return <aside className="pwa-install-prompt" aria-label="安裝 Reel Studio">
+    <div className="pwa-install-icon" aria-hidden="true">▶</div>
+    <div className="pwa-install-copy"><strong>把 Reel Studio 放到主畫面</strong><p>{ios ? '點選瀏覽器的分享，再選「加入主畫面」。' : '安裝後可像 App 一樣快速開啟。'}</p></div>
+    {ios ? <button type="button" className="pwa-install-action" onClick={onDismiss}>知道了</button> : <button type="button" className="pwa-install-action" onClick={onInstall}>安裝 App</button>}
+    <button type="button" className="pwa-install-close" aria-label="關閉安裝提示" onClick={onDismiss}>×</button>
+  </aside>;
+}
+
 function ClipControls({ clip, update, updateLayer, resetPosition, renderOne }) {
   const layer = clip.activeLayer || 'topText';
   const s = clip.style[layer];

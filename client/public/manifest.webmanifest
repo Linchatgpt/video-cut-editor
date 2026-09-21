@@ -1,0 +1,15 @@
+{
+  "name": "Reel Studio｜剪出值得看的片段",
+  "short_name": "Reel Studio",
+  "description": "從長影片找出值得看的片段，調整字卡並輸出短影音。",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#101214",
+  "theme_color": "#101214",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

@@ -10,6 +10,17 @@
 body { margin: 0; min-width: 320px; background: #101214; }
 button, input { font: inherit; }
 
+.pwa-install-prompt { position: fixed; z-index: 20; right: 22px; bottom: 22px; display: grid; grid-template-columns: auto 1fr auto auto; gap: 12px; align-items: center; width: min(390px, calc(100vw - 32px)); padding: 14px 16px; color: #f7f2eb; background: #171b20; border: 1px solid #f2b8a2; box-shadow: 6px 6px 0 rgba(242,184,162,.18); }
+.pwa-install-icon { display: grid; place-items: center; width: 34px; height: 34px; color: #101214; background: #f2b8a2; font-size: 13px; }
+.pwa-install-copy strong { display: block; font-size: 14px; }
+.pwa-install-copy p { margin: 3px 0 0; color: #aeb7b5; font-size: 12px; line-height: 1.45; }
+.pwa-install-action, .pwa-install-close { border: 1px solid #f2b8a2; color: #f2b8a2; background: transparent; font: inherit; cursor: pointer; }
+.pwa-install-action { min-height: 36px; padding: 7px 10px; white-space: nowrap; }
+.pwa-install-action:hover, .pwa-install-action:focus-visible { color: #101214; background: #f2b8a2; }
+.pwa-install-close { align-self: start; width: 24px; height: 24px; border-color: transparent; font-size: 20px; line-height: 1; }
+.pwa-install-close:hover, .pwa-install-close:focus-visible { border-color: #f2b8a2; }
+@media (max-width: 560px) { .pwa-install-prompt { right: 16px; bottom: 16px; grid-template-columns: auto 1fr auto; } .pwa-install-close { grid-column: 3; grid-row: 1; } .pwa-install-action { grid-column: 2 / 4; grid-row: 2; justify-self: start; } }
+
 .shell { width: min(1180px, calc(100% - 48px)); margin: 0 auto; padding: 34px 0 72px; }
 .topbar { display: flex; align-items: center; gap: 14px; border-bottom: 1px solid #2b2f31; padding-bottom: 26px; }
 .brand-mark { display: grid; place-items: center; width: 42px; height: 42px; color: #101214; background: #f2b8a2; border-radius: 50%; font-size: 22px; }
