@@ -13,7 +13,7 @@ import { getVideoDimensions } from './services/ffmpegService.js';
 const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
 const serverDirectory = path.resolve(currentDirectory, '..');
 
-export function createApp({ uploadDirectory = path.join(serverDirectory, 'uploads'), tempDirectory = path.join(serverDirectory, 'temp'), outputDirectory = path.join(serverDirectory, 'outputs'), musicDirectory = path.join(serverDirectory, 'music') } = {}) {
+export function createApp({ uploadDirectory = path.join(serverDirectory, 'uploads'), tempDirectory = path.join(serverDirectory, 'temp'), outputDirectory = path.join(serverDirectory, 'outputs'), musicDirectory = path.join(serverDirectory, 'music'), publicApiUrl = process.env.PUBLIC_API_URL || '' } = {}) {
   const app = express();
   const uploadRouter = createUploadRouter({ uploadDirectory });
   fs.mkdirSync(musicDirectory, { recursive: true });
@@ -28,7 +28,7 @@ export function createApp({ uploadDirectory = path.join(serverDirectory, 'upload
   app.get('/api/default-video', async (_request, response, next) => {
     const defaultPath = path.join(uploadDirectory, 'default.mp4');
     if (!requireFile(defaultPath)) return response.status(404).json({ error: '尚未設定預設影片' });
-    try { return response.json({ fileId: 'default', originalName: '鈴木一朗「我的夢想」中文字幕.mp4', videoUrl: '/api/video/default', dimensions: await getVideoDimensions(defaultPath) }); } catch (error) { return next(error); }
+    try { return response.json({ fileId: 'default', originalName: '鈴木一朗「我的夢想」中文字幕.mp4', videoUrl: `${publicApiUrl}/api/video/default`, dimensions: await getVideoDimensions(defaultPath) }); } catch (error) { return next(error); }
   });
 
   app.get('/api/video/default', (_request, response) => {
@@ -40,7 +40,7 @@ export function createApp({ uploadDirectory = path.join(serverDirectory, 'upload
   app.post('/api/upload', uploadRouter.upload.single('video'), async (request, response, next) => { try { const result = uploadRouter.handleUpload(request, response); if (result?.then) await result; } catch (error) { next(error); } });
   app.post('/api/analyze', createAnalyzeRouter({ uploadDirectory, tempDirectory }));
   app.get('/api/music', (_request, response) => response.json({ music: fs.readdirSync(musicDirectory).filter((name) => /\.(mp3|wav|m4a|aac|ogg)$/i.test(name)).sort() }));
-  app.post('/api/render', createRenderRouter({ uploadDirectory, tempDirectory, outputDirectory, musicDirectory }));
+  app.post('/api/render', createRenderRouter({ uploadDirectory, tempDirectory, outputDirectory, musicDirectory, publicApiUrl }));
   app.get('/api/download/:fileName', (request, response) => {
     const fileName = path.basename(request.params.fileName);
     const outputPath = path.join(outputDirectory, fileName);

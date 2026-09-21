@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+const fetch = (input, options) => window.fetch(`${API_BASE_URL}${input}`, options);
+
 const makeStyle = () => ({ topText: { color: '#2F80ED', fontSize: 72, fontFamily: 'Noto Sans TC', x: 50, y: 22, width: 88, showFrom: 0, hideAt: 9999 }, bottomText: { color: '#2F80ED', fontSize: 72, fontFamily: 'Noto Sans TC', x: 50, y: 52, width: 88, showFrom: 0, hideAt: 9999 } });
 const fonts = [
   { value: 'Noto Sans TC', label: 'Noto Sans TC' },
