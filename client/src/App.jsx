@@ -62,6 +62,12 @@ export default function App() {
   async function renderOne(clip) { if (!Number.isFinite(clip.start_time) || !Number.isFinite(clip.end_time) || clip.end_time <= clip.start_time) { setError('結束時間必須大於開始時間，請先調整片段範圍。'); return; } update(clip.id, 'rendering', true); try { const r = await fetch('/api/render', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fileId, clips: [clip] }) }); const data = await readJson(r); if (!r.ok) throw new Error(data.error || '影片渲染失敗'); update(clip.id, 'renderedUrl', data.outputs[0].previewUrl); update(clip.id, 'downloadUrl', data.outputs[0].downloadUrl); update(clip.id, 'rendering', false); setStatus('片段 ' + (clips.findIndex((c) => c.id === clip.id) + 1) + ' 已完成渲染'); } catch (e) { setError(e.message); update(clip.id, 'rendering', false); } }
 
   const selectedClip = clips.find((clip) => clip.id === selectedClipId) || clips[0];
+  useEffect(() => {
+    if (selectedClip && playingClipId === selectedClip.id && videoRef.current) {
+      videoRef.current.muted = Boolean(selectedClip.musicFile && selectedClip.keepOriginalAudio === false);
+      if (audioRef.current) audioRef.current.volume = Number(selectedClip.musicVolume ?? 0.35);
+    }
+  }, [selectedClip, playingClipId]);
   return <main className="shell">
     {installVisible && <InstallPrompt ios={installGuide} onInstall={installApp} onDismiss={dismissInstall} />}
     <audio ref={audioRef} preload="metadata" className="music-preview-audio" />
