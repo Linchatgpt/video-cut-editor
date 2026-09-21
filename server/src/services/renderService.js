@@ -14,13 +14,13 @@ export function renderClip({ sourcePath, clip, titleLayerPath, bottomLayerPath, 
     const top = clip.style?.topText || {}; const bottom = clip.style?.bottomText || {};
     const topStart = Math.max(0, Number(top.showFrom || 0)); const topEnd = Math.max(topStart, Number(top.hideAt >= 9999 ? clip.end_time - clip.start_time : top.hideAt));
     const bottomStart = Math.max(0, Number(bottom.showFrom || 0)); const bottomEnd = Math.max(bottomStart, Number(bottom.hideAt >= 9999 ? clip.end_time - clip.start_time : bottom.hideAt));
-    const keepOriginalAudio = clip.keepOriginalAudio !== false;
+    const originalVolume = Math.min(1, Math.max(0, Number(clip.originalVolume ?? (clip.keepOriginalAudio === false ? 0 : 1))));
     const musicVolume = Math.min(1, Math.max(0, Number(clip.musicVolume ?? 0.35)));
-    const audio = musicPath && keepOriginalAudio
-      ? `[3:a]volume=${musicVolume}[music];[0:a][music]amix=inputs=2:duration=first:weights=1+1[aout]`
+    const audio = musicPath && originalVolume > 0
+      ? `[0:a]volume=${originalVolume}[original];[3:a]volume=${musicVolume}[music];[original][music]amix=inputs=2:duration=first:weights=1+1[aout]`
       : musicPath
         ? `[3:a]volume=${musicVolume}[aout]`
-        : '[0:a]anull[aout]';
+        : `[0:a]volume=${originalVolume}[aout]`;
     command.complexFilter(`[0:v]${crop},scale=${size}[base];[base][1:v]overlay=0:0:format=auto:enable='between(t,${topStart},${topEnd})'[withtop];[withtop][2:v]overlay=0:0:format=auto:enable='between(t,${bottomStart},${bottomEnd})'[outv];${audio}`)
       .outputOptions(['-y', '-map [outv]', '-map [aout]', '-c:v libx264', '-c:a aac', '-pix_fmt yuv420p', '-shortest'])
       .on('end', resolve)
