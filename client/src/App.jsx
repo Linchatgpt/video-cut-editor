@@ -2,6 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
 const fetch = (input, options) => window.fetch(`${API_BASE_URL}${input}`, options);
+async function fetchWithRetry(input, options, attempts = 3) {
+  let lastError;
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try { return await fetch(input, options); } catch (error) { lastError = error; if (attempt < attempts - 1) await new Promise((resolve) => setTimeout(resolve, 700 * (attempt + 1))); }
+  }
+  throw lastError;
+}
 async function readJson(response) {
   const text = await response.text();
   if (!text.trim()) throw new Error(`後端沒有回應（HTTP ${response.status}）。請確認後端服務已啟動並已連線。`);
@@ -50,9 +57,9 @@ export default function App() {
   const dismissInstall = () => { localStorage.setItem('reel-studio-pwa-dismissed-at', String(Date.now())); setInstallVisible(false); };
   const installApp = async () => { if (!installPrompt) return; installPrompt.prompt(); await installPrompt.userChoice; setInstallPrompt(null); setInstallVisible(false); };
 
-  useEffect(() => { fetch('/api/default-video').then((r) => r.ok ? r.json() : null).then((v) => { if (v) { setFileId(v.fileId); setVideoUrl(v.videoUrl); setDimensions(v.dimensions); setSelectedFile({ name: v.originalName }); setStatus('預設影片已載入，可直接開始分析'); } }).catch(() => {}); }, []);
-  useEffect(() => { fetch('/api/music').then((r) => r.ok ? r.json() : null).then((v) => v && setMusicFiles(v.music || [])).catch(() => {}); }, []);
-  const analyze = async (id) => { setError(''); setAnalyzing(true); setStatus('正在分析語音與高光片段…'); try { const r = await fetch('/api/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fileId: id, clipCount, clipDuration }) }); const data = await readJson(r); if (!r.ok) throw new Error(data.error || '影片分析失敗'); const next = data.clips.map((c) => ({ ...c, source: 'ai', top_text: c.top_text || c.title, caption: c.bottom_text || c.title, aiStart: c.start_time, aiEnd: c.end_time, outputAspect: 'original', cropPosition: makeCropPosition(), style: makeStyle(), activeLayer: 'topText', musicFile: '', musicVolume: 0.35, originalVolume: 1 })); setClips((all) => [...all.filter((clip) => clip.source === 'manual'), ...next]); setSelectedClipId(next[0]?.id || null); setStatus('已找到 ' + data.clips.length + ' 個候選片段，已保留手動片段'); } catch (e) { setError('AI 分析未完成：' + e.message + ' 仍可直接新增手動片段。'); setStatus('影片已就緒，可手動新增片段'); } finally { setAnalyzing(false); } };
+  useEffect(() => { fetchWithRetry('/api/default-video').then((r) => r.ok ? r.json() : null).then((v) => { if (v) { setFileId(v.fileId); setVideoUrl(v.videoUrl); setDimensions(v.dimensions); setSelectedFile({ name: v.originalName }); setStatus('預設影片已載入，可直接開始分析'); } }).catch(() => {}); }, []);
+  useEffect(() => { fetchWithRetry('/api/music').then((r) => r.ok ? r.json() : null).then((v) => v && setMusicFiles(v.music || [])).catch(() => {}); }, []);
+  const analyze = async (id) => { setError(''); setAnalyzing(true); setStatus('正在分析語音與高光片段…'); try { const r = await fetchWithRetry('/api/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fileId: id, clipCount, clipDuration }) }); const data = await readJson(r); if (!r.ok) throw new Error(data.error || '影片分析失敗'); const next = data.clips.map((c) => ({ ...c, source: 'ai', top_text: c.top_text || c.title, caption: c.bottom_text || c.title, aiStart: c.start_time, aiEnd: c.end_time, outputAspect: 'original', cropPosition: makeCropPosition(), style: makeStyle(), activeLayer: 'topText', musicFile: '', musicVolume: 0.35, originalVolume: 1 })); setClips((all) => [...all.filter((clip) => clip.source === 'manual'), ...next]); setSelectedClipId(next[0]?.id || null); setStatus('已找到 ' + data.clips.length + ' 個候選片段，已保留手動片段'); } catch (e) { setError('AI 分析未完成：' + e.message + ' 仍可直接新增手動片段。'); setStatus('影片已就緒，可手動新增片段'); } finally { setAnalyzing(false); } };
   async function upload(file) { setSelectedFile(file); setVideoUrl(URL.createObjectURL(file)); setClips([]); setSelectedClipId(null); setStatus('正在上傳…'); try { const form = new FormData(); form.append('video', file); const r = await fetch('/api/upload', { method: 'POST', body: form }); const data = await readJson(r); if (!r.ok) throw new Error(data.error); setFileId(data.fileId); setDimensions(data.dimensions); setError(''); setStatus('影片已上傳，可選擇開始 AI 分析或直接新增手動片段'); } catch (e) { setError(e.message); setStatus('需要處理'); } }
   const update = (id, field, value) => setClips((all) => all.map((c) => c.id === id ? { ...c, [field]: ['start_time', 'end_time'].includes(field) ? Number(value) : value, ...(['renderedUrl', 'downloadUrl', 'rendering'].includes(field) ? {} : { renderedUrl: undefined, downloadUrl: undefined }) } : c));
   const updateLayer = (id, layer, field, value) => setClips((all) => all.map((c) => c.id === id ? { ...c, renderedUrl: undefined, style: { ...c.style, [layer]: { ...c.style[layer], [field]: ['x', 'y', 'fontSize', 'width', 'showFrom', 'hideAt'].includes(field) ? (value === '' ? '' : Number(value)) : value } } } : c));
